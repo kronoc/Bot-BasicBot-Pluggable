@@ -4,3 +4,5 @@ Revision history for Perl extension Bot::BasicBot::Pluggable.
 	- original version; created by h2xs 1.22 with options
 		-X Bot::BasicBot::Pluggable
 
+0.011 Mon Feb 24 18:00:00 2003
+	- oops.

@@ -175,7 +175,7 @@ sub said {
 sub authed {
     my ($self, $username) = @_;
 
-    return 1 if ($self->{auth}{$username}{time} + 3600 > time());
+    return 1 if ($self->{auth}{$username}{time} and $self->{auth}{$username}{time} + 3600 > time());
     return 0;
     
 }

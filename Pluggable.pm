@@ -9,7 +9,7 @@ use Carp qw(croak);
 
 our @ISA = qw(Bot::BasicBot);
 
-our $VERSION = '0.01';
+our $VERSION = '0.011';
 
 =head1 NAME
 
@@ -100,24 +100,7 @@ sub load {
 
     return "Already have a handler with that name" if $self->handler($module);
 
-    my $filename = "Modules/$module.pm";
-    unless (-e $filename) {
-        for (@INC) {
-            if (-e "$_/Bot/BasicBot/Pluggable/Module/$module.pm") {
-                $filename = "$_/Bot/BasicBot/Pluggable/Module/$module.pm";
-                last;
-            }
-            return "Can't find module $module in \@INC or pwd";
-        }
-    }
-
-    my $text;
-    open MODULE, $filename or return "Can't open $filename: $!";
-    { local $/; $text = <MODULE>; }
-    close MODULE;
-    return "Didn't read any text from $filename" unless $text;
-
-    eval $text;
+    eval "require \"Bot/BasicBot/Pluggable/Module/$module.pm\"";
 
     return "Can't eval module: $@" if $@;
 
