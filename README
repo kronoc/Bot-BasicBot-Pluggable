@@ -1,104 +1,221 @@
-Bot/BasicBot/Pluggable version 0.01
-===================================
+NAME
+    Bot::BasicBot::Pluggable - extension to the simple irc bot base class
+    allowing for pluggable modules
 
-OVERVIEW
+SYNOPSIS
+  Creating the bot module
+      # with all defaults
+      my $bot = Bot::BasicBot->new();
 
-Bot::BasicBot::Pluggable is a modular IRC bot framework that lets you
-write your own modules very simply, or to just use the stock modules for
-a decent out-the-box infobot.
+      # with useful options
+      my $bot = Bot::BasicBot::Pluggable->new( channels => ["#bottest"],
 
-Several modules are installed by default. These are:
+                          server => "irc.example.com",
+                          port   => "6667",
 
-Core Modules
-(not really user-visible, these modules are used to manage the bot)
+                          nick     => "pluggabot",
+                          altnicks => ["pbot", "pluggable"],
+                          username => "bot",
+                          name     => "Yet Another Pluggable Bot",
 
-Base    - Not really a module, this is the base class all modules
-          inherit from.
-Auth    - Restricts certain commands to authenticaed users only, so
-          non-admins can't add/remove modules, etc, etc.
-Loader  - Load and unload modules with IRC commands.
-Vars    - Set and unset module vars with IRC commands.
+                          ignore_list => [qw(hitherto blech muttley)],
 
-Feature Modules
+                    );
 
-Seen    - Keeps track of when and where people last spoke, ask the bot
-          'seen <nick>' and it'll tell you when it last saw the
-          person.
-Karma   - Tracks 'karma' for objects - manipulate an object's karma
-          with 'object++' to increase it and 'object--' to decrease it,
-          ask 'karma object' to get the karma of the object.
-Infobot - Tracks infobot-style factiods. Tell the bot 'bob is green',
-          and in the future, asking, 'bot, bob?', the bot will respond
-          with 'bob is green.'.
-Blog    - Implements a chumpbot. When combined with the code in the
-          examples folder, lets you blog to a website from IRC. See
-          http://2lmc.org/spool for an example of it's use. Alas, right
-          now it's not what I'd call usable unless you're prepared to
-          mess with SQL. Read the code.
-DNS     - Do DNS queries from IRC.
-Google  - Do Google searches and spelling checks from IRC.
-Join    - Join and leave channels at the behest of admins.
+      (You can pass any option that's valid for Bot::BasicBot)
 
-BBP should work mostly out the box. Install the modules, and copy
-the mind.pl script out of examples/ somewhere. Edit the script, and
-set little details, such as the server, bot name, etc, and run the
-script. The bot should connect to the IRC server, but won't have
-any modules installed, and won't be joined to any channels. Open a
-query window to it, and type the following:
+  Running the bot (simple)
+    There's a shell script installed to run the bot.
 
-!load Auth             # loads the Auth module, to stop other people
-                       # stealing your bot.
-!auth admin julia      # log in as 'admin', with the default password.
-!adduser <username> <password>
-                       # create a new user
-!auth <usernmae> <password>
-                       # log in as that user
-!deluser admin         # remove the old admin user.
+      $ bot-basicbot-pluggable.pl --nick MyBot --server irc.perl.org
 
-Now the bot is secure against other people stealing it. Because the
-'Loader' module is always installed, the 'Auth' module will now
-always be loaded, so there will always be protection on it. now let's
-load some simple modules. Notice that things starting with a '!' are
-admin commands, and can only be sued by people with are logged into
-the bot.
+    Then connect to the IRC server, /query the bot, and set a password. See
+    Bot::BasicBot::Pluggable::Module::Auth for details.
 
-!load Seen             # load the 'Seen' module.
-!load Join             # Load the 'Join' module
-join #mychannel        # Join a channel.
-seen dave?             # have we seen dave?
+  Running the bot (advanced)
+    There are two useful ways you can use a Pluggable bot. The simple way
+    and the flexible way. The simple way is:
 
-etc,etc.
+      # Load some useful modules
+      my $infobot_module = $bot->load("Infobot");
+      my $google_module = $bot->load("Google");
+      my $seen_module = $bot->load("Seen");
 
-
-INSTALLATION
-
-To install this module type the following:
-
-   perl Makefile.PL
-   make
-   make test
-   make install (as root)
-
-DEPENDENCIES
-
-This module requires these other modules and libraries:
-
-  POE
-  Bot::BasicBot
+      # Set the google key (see http://www.google.com/apis/)
+      $google_module->set("google_key", "some google key");
   
-The Infobot module needs the following:
-  XML::RSS
-  LWP::Simple
+      $bot->run();
+
+    This lets you run a bot with a few modules, but not change those modules
+    during the run of the bot. The complex way is as follows:
+
+      # Load the loader module
+      $bot->load('Loader');
   
-The Google module needs:
-  Net::Google
+      # run the bot
+      $bot->run();
 
+    This is simpler but needs setup once the bot is joined to a server. the
+    Loader module lets you talk to the bot in-channel and tell it to load
+    and unload other modules. The first one you'll want to load is the
+    'Auth' module, so that other people can't load and unload modules
+    without permission. Then you need to log in as an admin and change your
+    password.
 
+      (in a query)
+      !load Auth
+      !auth admin julia
+      !password julia new_password
+      !auth admin new_password
+  
+    Once you've done this, your bot is safe against other IRC users. Now you
+    can tell it to load and unload other modules any time:
 
-COPYRIGHT AND LICENCE
+      !load Seen
+      !load Google
+      !load Join
 
-Copyright (C) 2003 Tom Insam <tom@jerakeen.org>
+    The join module lets you tell the bot to join and leave channels:
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+      !join #mychannel
+      !leave #someotherchannel
+  
+    The perldoc pages for the various modules will list other commands.
+
+DESCRIPTION
+    Bot::BasicBot::Pluggable started as Yet Another Infobot replacement, but
+    now is a generalised framework for writing infobot-type bots, that lets
+    you keep each function seperate. You can have seperate modules for
+    factoid tracking, 'seen' status, karma, googling, etc. Included with the
+    package are modules for:
+
+      Auth - user authentication and admin access
+      Loader - loads and unloads modules as bot commands
+      Join - joins and leaves channels
+      Vars - changes module variables
+      Infobot - handles infobot-style factoids
+      Karma - tracks the popularity of things
+      Seen - tells you when people were last seen
+      DNS - host lookup
+      Google - search google for things
+      Title - Gets the title of pages mentioned in channel
+
+    use perldoc Bot::BasicBot::Pluggable::Module::<module name> for help on
+    their terminology.
+
+    The way this works is very simple. You create a new bot object, and tell
+    it to load various modules. Then you run the bot. The modules get events
+    when the bot sees things happen, and can respond to the events.
+
+    perldoc Bot::BasicBot::Pluggable::Module::Base for the details of the
+    module API.
+
+  Main Methods
+    new Create a new Bot. Identical to the new method in Bot::BasicBot.
+
+    load($module)
+        Load a module for the bot by name, from ./modules/Modulename.pm if
+        that file exists, and falling back to the system package
+        Bot::BasicBot::Pluggable::Module::$module if not.
+
+    reload($module)
+        Reload the module $module - equivalent to unloading it (if it's
+        already loaded) and reloading it. Will stomp the old module's
+        namespace - warnings are expected here.
+
+        Not toally clean - if you're experiencing odd bugs, restart the bot
+        if possible. Works for minor bug fixes, etc.
+
+    unload
+        Removes a module from the bot. It won't get events any more.
+
+    module($module)
+        returns the handler object for the loaded module '$module'. used,
+        eg, to get the 'Auth' hander to check if a given user is
+        authenticated.
+
+    modules
+        returns a list of the names of all loaded modules, as an array.
+
+  add_handler(handler object, name of handler)
+        adds a handler object with the given name to the queue of modules.
+        There is no order specified internally, adding a module earlier does
+        not guarantee it gets called first. Names must be unique.
+
+  remove_handler
+        remove a handler with the given name.
+
+  store
+        returns the object store associated with the bot. See
+        Bot::BasicBot::Pluggable::Store.
+
+  dispatch(method name, params)
+        call the named method on every loaded module, if the module has a
+        method with that name.
+
+  said
+        called as a subclass of Bot::BasicBot,
+
+    run runs the bot. The POE core gets control as of this point, you're
+        unlikely to get control back.
+
+AUTHOR
+    Tom Insam <tom@jerakeen.org>
+
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
+CREDITS
+    Bot::BasicBot was written initially by Mark Fowler, and worked on
+    heavily by Simon Kent, who was kind enough to apply some patches I
+    needed for Pluggable.
+
+    Eventually.
+
+    Oh, yeah, and I stole huge chunks of docs from the Bot::BasicBot source,
+    too.
+
+    Various people helped with modules. Convert was almost ported from the
+    infobot code by blech. But not quite. Thanks for trying.. blech has also
+    put a lot of effort into the chump.cgi/chump.tem in the examples/
+    folder, including some /inspired/ calendar evilness.
+
+    And thanks to the rest of #2lmc, who were my unwilling guinea pigs
+    during development. And who kept suggesting totally stupid ideas for
+    modules that I then felt compelled to go implement. Shout.pm owes it's
+    existence to #2lmc.
+
+    I spent a lot of time in the mozbot code, and that has influenced my
+    ideas for Pluggable. Mostly to get round its awfulness.
+
+SYSTEM REQUIREMENTS
+    Bot::BasicBot::Pluggable is based on POE, and really needs the latest
+    version. Because POE is like that sometimes.
+
+    You also need POE::Component::IRC. Oh, and Bot::BasicBot.
+
+    Some of the modules will need more modules. eg, Google.pm needs
+    Net::Google. See the module docs for more details.
+
+BUGS
+    During the make, make test make install process, POE will moan about its
+    kernel not being run. This is a Bot::BasicBot problem, apparently.
+
+    reloading a module causes warnings as the old module gets it's namespace
+    stomped. Not a lot you can do about that.
+
+    All modules need to be in the Bot::Pluggable::Module:: namespace. Well,
+    that's not really a bug.
+
+    More other things than I can shake a stick at.
+
+SEE ALSO
+    POE
+
+    POE::Component::IRC
+
+    Bot::BasicBot
+
+    Possibly Infobot, at http://www.infobot.org, and Mozbot, somewhere in
+    mozilla.org.
 

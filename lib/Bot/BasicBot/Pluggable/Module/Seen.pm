@@ -1,8 +1,3 @@
-package Bot::BasicBot::Pluggable::Module::Seen;
-use Bot::BasicBot::Pluggable::Module::Base;
-use base qw(Bot::BasicBot::Pluggable::Module::Base);
-our $VERSION = '0.05';
-
 =head1 NAME
 
 Bot::BasicBot::Pluggable::Module::Seen
@@ -33,22 +28,33 @@ Stops hiding
 
 =cut
 
+package Bot::BasicBot::Pluggable::Module::Seen;
+use warnings;
+use strict;
+use base qw(Bot::BasicBot::Pluggable::Module);
+
 
 sub help {
-    return "Tracks seen status of people. say 'seen <nick>' to find out where I last saw someone. Tell me 'hide' and I'll stop tracking you, stop with 'unhide'.";
+    return "Tracks seen status of people. ".
+    "say 'seen <nick>' to find out where I last saw someone. ".
+    "Tell me 'hide' and I'll stop tracking you, stop with 'unhide'.";
 }
-
 
 sub said {
     my ($self, $mess, $pri) = @_;
     my $body = $mess->{body};
 
+    # no admin stuff please.
+    return if $mess->{body} =~ /^!/;
+    
     if ($pri == 0) {
-        $self->{store}{seen}{lc($mess->{who})}{time} = time;
-        $self->{store}{seen}{lc($mess->{who})}{channel} = $mess->{channel};
-        $self->{store}{seen}{lc($mess->{who})}{what} =
-            $mess->{channel} ne 'msg' ? $mess->{body} : '<private message>';
-        $self->save();
+        my $nick = lc($mess->{who});
+
+        $self->set( "seen_$nick" => {
+            time => time,
+            channel => $mess->{channel},
+            what => $mess->{channel} ne 'msg' ? $mess->{body} : '<private message>',
+        } );
         return undef;
     }
 
@@ -58,9 +64,10 @@ sub said {
     $command = lc($command);
 
     if ($command eq "seen" and $param =~ /^(\w+)\??$/) {
-        my $who = $1;
-        my $seen = $self->{store}{seen}{lc($who)};
-        if ($self->{store}{hidden}{lc($who)} or !$seen) {
+        my $who = lc($1);
+        my $seen = $self->get("seen_$who");
+
+        if ($self->get("hide_$who") or !$seen) {
             return "Sorry, I haven't seen $who";
         }
         my $diff = time - $seen->{time};
@@ -69,12 +76,13 @@ sub said {
         return "$who was last seen in $seen->{channel} $time_string saying '$seen->{what}'";
 
     } elsif ($command eq "hide" and $mess->{address}) {
-        $self->{store}{hidden}{lc($mess->{who})}++;
-        $self->save();
+        my $nick = lc($mess->{who});
+        $self->set( "hide_$nick" => 1 );
         return "Ok, you're hiding";
+
     } elsif ($command eq "unhide" and $mess->{address}) {
-        delete $self->{store}{hidden}{lc($mess->{who})};
-        $self->save();
+        my $nick = lc($mess->{who});
+        $self->unset( "hide_$nick" );
         return "Ok, you're visible";
     }
 

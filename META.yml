@@ -1,0 +1,57 @@
+---
+name: Bot-BasicBot-Pluggable
+version: 0.50
+author:
+  - Tom Insam E<lt>tom@jerakeen.orgE<gt>
+abstract: |-
+  extension to the simple irc bot base class
+  allowing for pluggable modules
+license: perl
+requires:
+  Bot::BasicBot: 0.30
+  DBD::SQLite: 0
+  DBI: 0
+  DBM::Deep: 0
+  Getopt::Long: 0
+  Test::More: 0.01
+  URI::Find::Simple: 0
+  URI::Title: 0.1
+  XML::Feed: 0
+  perl: 5.6.0
+provides:
+  Bot::BasicBot::Pluggable:
+    file: lib/Bot/BasicBot/Pluggable.pm
+    version: 0.50
+  Bot::BasicBot::Pluggable::Module:
+    file: lib/Bot/BasicBot/Pluggable/Module.pm
+  Bot::BasicBot::Pluggable::Module::Auth:
+    file: lib/Bot/BasicBot/Pluggable/Module/Auth.pm
+  Bot::BasicBot::Pluggable::Module::Base:
+    file: lib/Bot/BasicBot/Pluggable/Module/Base.pm
+  Bot::BasicBot::Pluggable::Module::DNS:
+    file: lib/Bot/BasicBot/Pluggable/Module/DNS.pm
+  Bot::BasicBot::Pluggable::Module::Google:
+    file: lib/Bot/BasicBot/Pluggable/Module/Google.pm
+  Bot::BasicBot::Pluggable::Module::Infobot:
+    file: lib/Bot/BasicBot/Pluggable/Module/Infobot.pm
+  Bot::BasicBot::Pluggable::Module::Join:
+    file: lib/Bot/BasicBot/Pluggable/Module/Join.pm
+  Bot::BasicBot::Pluggable::Module::Karma:
+    file: lib/Bot/BasicBot/Pluggable/Module/Karma.pm
+  Bot::BasicBot::Pluggable::Module::Loader:
+    file: lib/Bot/BasicBot/Pluggable/Module/Loader.pm
+  Bot::BasicBot::Pluggable::Module::Seen:
+    file: lib/Bot/BasicBot/Pluggable/Module/Seen.pm
+  Bot::BasicBot::Pluggable::Module::Title:
+    file: lib/Bot/BasicBot/Pluggable/Module/Title.pm
+  Bot::BasicBot::Pluggable::Module::Vars:
+    file: lib/Bot/BasicBot/Pluggable/Module/Vars.pm
+  Bot::BasicBot::Pluggable::Store:
+    file: lib/Bot/BasicBot/Pluggable/Store.pm
+  Bot::BasicBot::Pluggable::Store::DBI:
+    file: lib/Bot/BasicBot/Pluggable/Store/DBI.pm
+  Bot::BasicBot::Pluggable::Store::Deep:
+    file: lib/Bot/BasicBot/Pluggable/Store/Deep.pm
+  Bot::BasicBot::Pluggable::Store::Storable:
+    file: lib/Bot/BasicBot/Pluggable/Store/Storable.pm
+generated_by: Module::Build version 0.2608
