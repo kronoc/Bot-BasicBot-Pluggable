@@ -9,7 +9,7 @@ use Carp qw(croak);
 
 our @ISA = qw(Bot::BasicBot);
 
-our $VERSION = '0.011';
+our $VERSION = '0.04';
 
 =head1 NAME
 
@@ -257,7 +257,7 @@ sub said {
 sub help {
     my $self = shift;
     my $mess = shift;
-    $mess->{body} =~ s/^help\s+//i;
+    $mess->{body} =~ s/^help\s*//i;
     
     unless ($mess->{body}) {
         return "Ask me for help about: " . join(", ", $self->handlers())
@@ -268,7 +268,7 @@ sub help {
             return "Error calling help for handler $mess->{body}: $@" if $@;
             return $help;
         } else {
-            return "I don't know anything about that.";
+            return "I don't know anything about '$mess->{body}'.";
         }
     }
 }

@@ -1,4 +1,5 @@
 package Bot::BasicBot::Pluggable::Module::Base;
+our $VERSION = '0.04';
 
 =head1 NAME
 
@@ -78,5 +79,7 @@ sub said {
     return;
 }
 
+sub connected {
+}
 
 1;

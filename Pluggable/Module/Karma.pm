@@ -57,11 +57,11 @@ sub said {
 
     my ($command, $param) = split(/\s+/, $body, 2);
     $command = lc($command);
-    $param =~ s/\?$//;
+    $param =~ s/\?$// if $param;
     
-    if ($command eq "karma" and $pri == 2) {
+    if ($command eq "karma" and $pri == 2 and $param) {
         return "$param has karma ".$self->get_karma($param);
-    } elsif ($command eq "explain" and $pri == 2) {
+    } elsif ($command eq "explain" and $pri == 2 and $param) {
         $param =~ s/^karma\s+//i;
         my ($karma, $good, $bad) = $self->get_karma($param);
         my $reply = "$param has karma ".$self->get_karma($param).". ";

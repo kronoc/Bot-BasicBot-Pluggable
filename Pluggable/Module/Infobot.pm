@@ -53,6 +53,13 @@ Finally, you can read RSS feeds:
   
 ok, you get the idea.
 
+You can also tell the bot to learn a factoid from another bot, as follows:
+
+  me: eric, learn fact from dispy
+  eric: learnt 'fact is very boring' from dipsy.
+  me: fact?
+  eric: fact is very boring
+  
 =head1 VARS
 
 =over 4
@@ -80,7 +87,7 @@ sub init {
     $self->{store}{vars}{ask} = '' unless defined($self->{store}{vars}{ask});
     $self->{infobot} = {};
 
-    # the Blog module requires a mysql database
+    # the Infobot module requires a mysql database
     my $dsn = "DBI:mysql:database=$self->{store}{vars}{db_name}";
     my $user = $self->{store}{vars}{db_user};
     my $pass = $self->{store}{vars}{db_pass};
@@ -105,21 +112,29 @@ sub said {
         print STDERR "Unknown infobot ID $1!!\n" unless $infobot_data;
         my ($object, $db, $factoid) = ($return =~ /^(.*) =(\w+)=> (.*)$/);
 
-        my @possibles = split(/\|/, $factoid);
-        $factoid = $possibles[int(rand(scalar(@possibles)))];
+        if ($infobot_data->{learn}) {
+            $self->set_factoid($mess->{who}, $object, $db, $factoid);
+            $factoid = "Learnt about $object from $mess->{who}";
+            
+        } else {
 
-        $factoid =~ s/<rss\s*=\s*\"?([^>\"]+)\"?>/$self->parseRSS($1)/ieg;
+            my @possibles = split(/\|/, $factoid);
+            $factoid = $possibles[int(rand(scalar(@possibles)))];
+    
+            $factoid =~ s/<rss\s*=\s*\"?([^>\"]+)\"?>/$self->parseRSS($1)/ieg;
 
-        print STDERR "factoid is '$factoid'\n";
-        if ($factoid =~ s/^<action>\s*//i) {
-            $self->{Bot}->emote({who=>$infobot_data->{who}, channel=>$infobot_data->{channel}, body=>"$factoid (via $mess->{who})"});
-            return 1;
+            print STDERR "factoid is '$factoid'\n";
+            if ($factoid =~ s/^<action>\s*//i) {
+                $self->{Bot}->emote({who=>$infobot_data->{who}, channel=>$infobot_data->{channel}, body=>"$factoid (via $mess->{who})"});
+                return 1;
+            }
+
+           $factoid = "$object $db $factoid" unless ($factoid =~ s/^<reply>\s*//i);
+
+            return unless $factoid;
+            $factoid .= " (via $mess->{who})";
         }
-
-        $factoid = "$object $db $factoid" unless ($factoid =~ s/^<reply>\s*//i);
-
-        return unless $factoid;
-        $factoid .= " (via $mess->{who})";
+        
         my $shorter;
         while ($factoid) {
             $shorter .= substr($factoid, 0, 300, "");
@@ -178,6 +193,17 @@ sub said {
         }
     }
     
+    print STDERR "infobot checking body is $body\n";
+    if ($body =~ /^learn\s+(\S+)\s+from\s+(\S+)$/i) {
+        my $list = $self->get_factoid($1);
+        if ($list) {
+            return "I already know about $1";
+        }
+        $mess->{learn} = 1;
+        $self->get_factoid($1, $mess, $2);
+        return "asking $2 about $1..\n";
+    }
+    
     return undef unless ($body =~ /\s+(is)\s+/i or $body =~ /\s+(are)\s+/i);
     my $is_are = $1;
 
@@ -203,7 +229,7 @@ sub said {
 }
 
 sub get_factoid {
-    my ($self, $object, $mess) = @_;
+    my ($self, $object, $mess, $from) = @_;
     print STDERR "get_factoid $object\n";
     return undef unless $self->{DB};
     my $query = $self->{DB}->prepare("SELECT * FROM infobot WHERE object=?");
@@ -217,7 +243,7 @@ sub get_factoid {
             my $id = "<" . int(rand(10000)) . ">";
             print STDERR "Asking $self->{store}{vars}{ask} about $object with id $id\n";
             $self->{infobot}{$id} = $mess;
-            $self->{Bot}->say(who=>$self->{store}{vars}{ask},
+            $self->{Bot}->say(who=>$from || $self->{store}{vars}{ask},
                               channel=>'msg',
                               body=>":INFOBOT:QUERY $id $object"
                              );
@@ -253,7 +279,7 @@ sub parseRSS {
     my $ret;
     foreach my $item (@$items) {
         my $title = $item->{title};
-        $title =~ s/\s+/\s/;
+        $title =~ s/\s+/ /;
         $title =~ s/\n//g;
         $title =~ s/\s+$//;
         $title =~ s/^\s+//;
