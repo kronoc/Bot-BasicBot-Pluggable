@@ -1,5 +1,7 @@
 package Bot::BasicBot::Pluggable::Module::Google;
 use Bot::BasicBot::Pluggable::Module::Base;
+use base qw(Bot::BasicBot::Pluggable::Module::Base);
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -31,14 +33,16 @@ Returns a google spelling suggestion for the wors given
 
 =item google_key
 
-The google API key to use for lookups. Must be set to use the module;
+The google API key to use for lookups. Must be set to use the module. The easiest
+way to do this is to use the 'Vars' module and tell the bot
+
+  '!set Google google_key <key>'
 
 =back
 
 =cut
 
 
-use base qw(Bot::BasicBot::Pluggable::Module::Base);
 
 use Net::Google;
 
@@ -46,24 +50,24 @@ sub init {
     my $self = shift;
 
     # default value for google_key is blank, so it shows up in the list of vars.
-    $self->{store}{vars}{google_key} = '' unless defined $self->{store}{vars}{google_key};
+    $self->set("google_key", "") unless $self->get("google_key");
 }
 
 sub said {
     my ($self, $mess, $pri) = @_;
     my $body = $mess->{body};
 
-    return unless ($pri == 2); # most common
+    return unless ($pri == 2);
 
     my ($command, $param) = split(/\s+/, $body, 2);
     $command = lc($command);
 
     if ($command eq "google") {
-        return "No google key set!" unless $self->{store}{vars}{google_key};
+        return "No google key set! Set it with '!set Google google_key <key>'." unless $self->get("google_key");
 
         print "Googling for $param\n";
 
-        my $google = Net::Google->new(key=>$self->{store}{vars}{google_key});
+        my $google = Net::Google->new(key=>$self->get("google_key"));
         my $search = $google->search();
 
         # Search interface
@@ -82,9 +86,9 @@ sub said {
         return "No results" unless $res;
         return "$res";
     } elsif ($command eq "spell") {
-        return "No google key set!" unless $self->{store}{vars}{google_key};
+        return "No google key set! Set it with '!set Google google_key <key>'." unless $self->get("google_key");
 
-        my $google = Net::Google->new(key=>$self->{store}{vars}{google_key});
+        my $google = Net::Google->new(key=>$self->get("google_key"));
         my $search = $google->search();
 
         my $res = $google->spelling(phrase=>$param)->suggest();
@@ -92,6 +96,10 @@ sub said {
         return "No clue";
 
     }
+}
+
+sub help {
+    return "Commands: 'google <terms>', or 'spell <words>'. The spelling module isn't very useful, though. Set a google_key with '!set Google google_key <key>' (after loading the Vars module)";
 }
 
 1;

@@ -14,7 +14,6 @@ Pluggable/Module/Join.pm
 Pluggable/Module/Karma.pm
 Pluggable/Module/Loader.pm
 Pluggable/Module/Seen.pm
-Pluggable/Module/Shout.pm
 Pluggable/Module/Vars.pm
 examples/chump.cgi
 examples/chump.tem

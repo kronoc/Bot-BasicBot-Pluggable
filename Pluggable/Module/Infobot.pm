@@ -1,6 +1,7 @@
 package Bot::BasicBot::Pluggable::Module::Infobot;
 use Bot::BasicBot::Pluggable::Module::Base;
 use base qw(Bot::BasicBot::Pluggable::Module::Base);
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -74,27 +75,16 @@ that we don't know about, and forward them on (with attribution).
 =cut
 
 
-
-use DBI;
-
-my $do_rss;
 use XML::RSS;
 use LWP::Simple;
+use warnings;
+use strict;
 
 sub init {
     my $self = shift;
 
     $self->{store}{vars}{ask} = '' unless defined($self->{store}{vars}{ask});
     $self->{infobot} = {};
-
-    # the Infobot module requires a mysql database
-    my $dsn = "DBI:mysql:database=$self->{store}{vars}{db_name}";
-    my $user = $self->{store}{vars}{db_user};
-    my $pass = $self->{store}{vars}{db_pass};
-
-    $self->{DB} = DBI->connect($dsn, $user, $pass)
-        or warn "Can't connect to database";
-
 }
 
 sub said {
@@ -107,23 +97,20 @@ sub said {
     if ($body =~ s/^:INFOBOT:REPLY (\S+) (.*)$// and $pri == 0) {
         my $return = $2;
         my $infobot_data = $self->{infobot}{$1};
-        print STDERR "infobot reply from $mess->{who} about $1\n";
-        print STDERR "  original question asked by $infobot_data->{who}\n";
-        print STDERR "Unknown infobot ID $1!!\n" unless $infobot_data;
         my ($object, $db, $factoid) = ($return =~ /^(.*) =(\w+)=> (.*)$/);
 
         if ($infobot_data->{learn}) {
             $self->set_factoid($mess->{who}, $object, $db, $factoid);
-            $factoid = "Learnt about $object from $mess->{who}";
-            
+            $factoid = "Learnt about $object from $mess->{who}"; # hacky.
+
         } else {
 
-            my @possibles = split(/\|/, $factoid);
+            my @possibles = split(/(?:=?or=?\s*)\|\s*/, $factoid);
             $factoid = $possibles[int(rand(scalar(@possibles)))];
-    
+
             $factoid =~ s/<rss\s*=\s*\"?([^>\"]+)\"?>/$self->parseRSS($1)/ieg;
 
-            print STDERR "factoid is '$factoid'\n";
+#            print STDERR "factoid is '$factoid'\n";
             if ($factoid =~ s/^<action>\s*//i) {
                 $self->{Bot}->emote({who=>$infobot_data->{who}, channel=>$infobot_data->{channel}, body=>"$factoid (via $mess->{who})"});
                 return 1;
@@ -133,6 +120,8 @@ sub said {
 
             return unless $factoid;
             $factoid .= " (via $mess->{who})";
+
+
         }
         
         my $shorter;
@@ -147,122 +136,122 @@ sub said {
         return 1;
     }
 
-    if ($body =~ s/\?$// and $pri == 3) {
+    if ( $body =~ s/\?$// and $mess->{address} and $pri == 3) {
         my $literal = 1 if ($body =~ s/^literal\s+//i);
 
-        my $list = $self->get_factoid($body, $mess);
-        my $reply;
-        my $is_are;
-        for my $row (@$list) {
-            $reply .= " =or= " if $reply;
-            $reply .= $row->{description};
-            $is_are = $row->{is_are};
-        }
-        if (!$reply) {
+        my $factoid;
+        unless ($factoid = $self->get_factoid($body, $mess)) {
             return undef unless $mess->{address};
             return "No clue. Sorry.";
         }
 
-        return "$body =is= $reply" if $literal;
+        return "$body =$factoid->{is_are}= $factoid->{description}" if $literal;
 
-        my @possibles = split(/\|/, $reply);
-        $reply = $possibles[int(rand(scalar(@possibles)))];
+        my @possibles = split(/(?:=?or=?\s*)\|\s*/, $factoid->{description});
+        my $reply = $possibles[int(rand(scalar(@possibles)))];
 
         $reply =~ s/<rss\s*=\s*\"?([^>\"]+)\"?>/$self->parseRSS($1)/ieg;
 
         if ($reply =~ s/^<action>\s*//i) {
-            $self->{Bot}->emote({who=>$mess->{who}, channel=>$mess->{channel}, body=>$reply});
+            $self->{Bot}->emote({
+                who=>$mess->{who},
+                channel=>$mess->{channel},
+                body=>$reply
+            });
             return 1;
         }
 
-        $reply = "$body $is_are $reply" unless ($reply =~ s/^<reply>\s*//i);
+        $reply = "$body $factoid->{is_are} $reply" unless ($reply =~ s/^<reply>\s*//i);
         return $reply;
     }
 
-    return unless ($mess->{address} and $pri == 2);
-
-    if ($body =~ /^forget\s+(.*)$/i) {
-        my $list = $self->get_factoid($1);
-        if ($list) {
-            for (@$list) {
-                $self->delete_factoid($_->{id});
-            }
+    if ($pri==2 and $mess->{address} and $body =~ /^forget\s+(.*)$/i) {
+        if ($self->delete_factoid($mess->{who}, $1)) {
             return "I forgot about $1";
         } else {
             return "I don't know anything about $1";
         }
     }
-    
-    print STDERR "infobot checking body is $body\n";
-    if ($body =~ /^learn\s+(\S+)\s+from\s+(\S+)$/i) {
-        my $list = $self->get_factoid($1);
-        if ($list) {
-            return "I already know about $1";
-        }
+    if ($pri==2 and $mess->{address} and $body =~ /^ask\s+(\w+)\s+about\s+(.*)$/i) {
         $mess->{learn} = 1;
-        $self->get_factoid($1, $mess, $2);
-        return "asking $2 about $1..\n";
+        if ($self->get_factoid($2, $mess, $1)) {
+            return "I already know about $2";
+        }
+        return "asking $1 about $2..\n";
     }
-    
-    return undef unless ($body =~ /\s+(is)\s+/i or $body =~ /\s+(are)\s+/i);
+
+    return unless ($pri==3);
+    return unless ($mess->{address} or $self->{store}{vars}{passive});
+    return unless ($body =~ /\s+(is)\s+/i or $body =~ /\s+(are)\s+/i);
     my $is_are = $1;
 
     my ($object, $description) = split(/\s+$is_are\s+/i, $body, 2);
-    $description =~ s/\.\s.*$//;
-            
-    if ($self->get_factoid($object)) {
+#    $description =~ s/\.\s.*$//;
 
-        if ($description =~ s/also\s+//i) {
-            $self->set_factoid($mess->{who}, $object, $is_are, $description);
-            return "ok. $object $is_are also $description";
-        } else {
+    my $replace = 1 if ($object =~ s/no,?\s*//i);
+
+    my @stopwords = split(/\s*,?\s*/, $self->{store}{vars}{stopwords});
+    return if grep(/^\Q$object$/i, @stopwords);
+                
+    if (my $old_factoid = $self->get_factoid($object)) {
+        if ($description =~ s/^also\s+//i) {
+            $description = $old_factoid->{description} .= " or ".$description;
+        } elsif (!$replace) {
+            return 1 unless $mess->{address};
             return "but I already know something about $object";
         }
-
-    } else {
-        $self->set_factoid($mess->{who}, $object, $is_are, $description);
-        return "ok. $object $is_are $description";
     }
-
-    return undef;
     
+    $self->set_factoid($mess->{who}, $object, $is_are, $description);
+    return 1 unless $mess->{address};
+    return "ok."; # $object $is_are $description";
+
 }
 
 sub get_factoid {
     my ($self, $object, $mess, $from) = @_;
-    print STDERR "get_factoid $object\n";
-    return undef unless $self->{DB};
-    my $query = $self->{DB}->prepare("SELECT * FROM infobot WHERE object=?");
-    $query->execute($object);
-    my @rows;
-    while (my $row = $query->fetchrow_hashref) {
-        push(@rows, $row);
+
+    my $factoid;
+    if ($factoid = $self->{store}{infobot}{lc($object)}->[-1]
+       and $factoid->{description} ) {
+        return $factoid;
     }
-    unless ($rows[0]) {
-        if ($self->{store}{vars}{ask} and $mess) {
-            my $id = "<" . int(rand(10000)) . ">";
-            print STDERR "Asking $self->{store}{vars}{ask} about $object with id $id\n";
-            $self->{infobot}{$id} = $mess;
-            $self->{Bot}->say(who=>$from || $self->{store}{vars}{ask},
-                              channel=>'msg',
-                              body=>":INFOBOT:QUERY $id $object"
-                             );
-        }
-        return undef;
+
+    if ($self->{store}{vars}{ask} and $mess) {
+        my $id = "<" . int(rand(10000)) . ">";
+        $self->{infobot}{$id} = $mess;
+        $self->{Bot}->say(who=>$from || $self->{store}{vars}{ask},
+                          channel=>'msg',
+                          body=>":INFOBOT:QUERY $id $object"
+                         );
     }
-    return \@rows;
+    return undef;
 }
 
 sub set_factoid {
     my ($self, $who, $object, $is_are, $description) = @_;
-    my $query = $self->{DB}->prepare("INSERT INTO infobot (create_time, create_who, object, is_are, description) VALUES (?, ?, ?, ?, ?)");
-    $query->execute(time, $who, $object, $is_are, $description);
+    push(@{$self->{store}{infobot}{lc($object)}}, {
+        create_time => time,
+        create_who => $who,
+        object => $object,
+        is_are => $is_are,
+        description => $description,
+    });
+    $self->save();
 }
 
 sub delete_factoid {
-    my ($self, $id) = @_;
-    my $query = $self->{DB}->prepare("DELETE FROM infobot WHERE id=?");
-    $query->execute($id);
+    my ($self, $who, $object) = @_;
+    return 0 unless ($self->get_factoid($object));
+    push(@{$self->{store}{infobot}{lc($object)}}, {
+        create_time => time,
+        create_who => $who,
+        object => $object,
+        is_are => undef,
+        description => undef,
+    });
+    $self->save();
+    return 1;
 }
 
 sub parseRSS {

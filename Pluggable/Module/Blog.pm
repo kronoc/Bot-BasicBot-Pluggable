@@ -1,5 +1,7 @@
 package Bot::BasicBot::Pluggable::Module::Blog;
 use Bot::BasicBot::Pluggable::Module::Base;
+use base qw(Bot::BasicBot::Pluggable::Module::Base);
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -78,7 +80,6 @@ See the web page code in the examples/ folder
 
 =cut
 
-use base qw(Bot::BasicBot::Pluggable::Module::Base);
 
 use DBI;
 
@@ -115,7 +116,7 @@ sub said {
     my ($command, $param) = split(/\s+/, $body, 2);
     $command = lc($command);
 
-    if ($command eq "blog") {
+    if ($command eq "blog" or $command eq "spool") {
         my $query = $self->{DB}->prepare("INSERT INTO mindblog (timestamp, entry_type, channel, who, data) VALUES (?, ?, ?, ?, ?)");
         $query->execute(time, 1, $mess->{channel}, $mess->{who}, $param);
         $self->{blog_id} = $self->{DB}->{mysql_insertid};
@@ -129,8 +130,7 @@ sub said {
 
     } elsif ($command eq "bc") {
         if ($self->{blog_id}) {
-            my $query = $self->{DB}->prepare("INSERT INTO mindblog_comments (blog_id, timestamp, who, data) VALUES (?, ?, ?, ?)");
-            $query->execute($self->{blog_id}, time, $mess->{who}, $param);
+            $self->comment($self->{blog_id}, $mess->{who}, $param);
             return 1;
         } else {
             return "I can't comment - I don't know what the last blog entry was.";
@@ -139,8 +139,7 @@ sub said {
     } elsif ($command eq "blogcomment") {
         my ($blog_id, $param) = split(/\s/, $param, 2);
         if ($blog_id) {
-            my $query = $self->{DB}->prepare("INSERT INTO mindblog_comments (blog_id, timestamp, who, data) VALUES (?, ?, ?, ?)");
-            $query->execute($blog_id, time, $mess->{who}, $param);
+            $self->comment($blog_id, $mess->{who}, $param);
             return 1;
         } else {
             return "Comment on what?";
@@ -228,6 +227,33 @@ sub said {
     }
 
     return undef;
+}
+
+sub comment {
+    my ($self, $id, $who, $body) = @_;
+    my $query = $self->{DB}->prepare("INSERT INTO mindblog_comments (blog_id, timestamp, who, data) VALUES (?, ?, ?, ?)");
+    $query->execute($id, time, $who, $body);
+    $query = $self->{DB}->prepare("SELECT COUNT(comment_id) as comments FROM mindblog_comments WHERE blog_id=?");
+    $query->execute($id);
+    my $count = $query->fetchrow_hashref()->{comments};
+    print STDERR "There are $count comments now\n";
+    if ($count > 4) {
+        break unless my $tb = $self->{Bot}->handler('Trackback');
+
+        print STDERR "Trying trackbacks\n";
+        my $query = $self->{DB}->prepare("SELECT data FROM mindblog WHERE blog_id=?");
+        $query->execute($id);
+        my $data = $query->fetchrow_hashref()->{data};
+
+        my $comments_query = $self->{DB}->prepare("SELECT data FROM mindblog_comments WHERE blog_id=?");
+        $comments_query->execute($id);
+        my $d;
+        $data .= " $d->{data}" while ($d = $comments_query->fetchrow_hashref());
+
+        while ($data =~ s!(http://[^\s\|\"\>\]]+)!!) {
+            print STDERR $tb->send_ping($1, $id)."\n";
+        }        
+    }
 }
 
 1;

@@ -9,7 +9,7 @@ use Carp qw(croak);
 
 our @ISA = qw(Bot::BasicBot);
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -22,7 +22,7 @@ allowing for pluggable modules
   my $bot = Bot::BasicBot->new();
 
   # with useful options
-  my $bot = Bot::BasicBot->new( channels => ["#bottest"],
+  my $bot = Bot::BasicBot::Pluggable->new( channels => ["#bottest"],
 
                       server => "irc.example.com",
                       port   => "6667",
@@ -37,9 +37,6 @@ allowing for pluggable modules
                 );
 
   (You can pass any option that's valid for Bot::BasicBot)
-
-  # Load base class of modules
-  $bot->load("Base");
 
   # Load some useful modules
   $bot->load("Infobot");
@@ -97,23 +94,29 @@ isn't available.
 sub load {
     my $self = shift;
     my $module = shift;
+    
+    croak "Already have a handler with that name" if $self->handler($module);
 
-    return "Already have a handler with that name" if $self->handler($module);
+    # This is possible a leeeetle bit evil.
+    my $file = "Bot/BasicBot/Pluggable/Module/$module.pm";
+    eval "
+        delete \$INC{\$file};
+        require \$file;
+    ";
+    # Ok, it's very evil. Don't bother me, I'm working.
 
-    eval "require \"Bot/BasicBot/Pluggable/Module/$module.pm\"";
-
-    return "Can't eval module: $@" if $@;
+    croak "Can't eval module: $@" if $@;
 
     my $m;
-    eval "\$m = Bot::BasicBot::Pluggable::Module::$module->new(Name=>\$module, Bot=>\$self);";
+    eval "\$m = Bot::BasicBot::Pluggable::Module::$module->new(Name=>\$module, Bot=>\$self, Param=>\\\@_);";
     
-    return "Can't call $module->new(): $@" if $@;
+    croak "Can't call $module->new(): $@" if $@;
 
-    return "->new didn't return an object" unless $m;
+    croak "->new didn't return an object" unless $m;
 
     $self->add_handler($m, $module);
 
-    return "Success";
+    return $m;
 }
 
 =item reload($module)

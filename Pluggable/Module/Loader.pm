@@ -1,6 +1,7 @@
 package Bot::BasicBot::Pluggable::Module::Loader;
 use Bot::BasicBot::Pluggable::Module::Base;
 use base qw(Bot::BasicBot::Pluggable::Module::Base);
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -9,7 +10,8 @@ Bot::BasicBot::Pluggable::Module::Loader
 =head1 SYNOPSIS
 
 Loads and unloads bot modules. Keeps track of loaded modules, and restores
-them on bot startup.
+them on bot startup. Load this module in the shell script that starts the bot,
+and it should handle everything else for you.
 
 =head1 IRC USAGE
 
@@ -78,7 +80,7 @@ sub said {
     my ($self, $mess, $pri) = @_;
     my $body = $mess->{body};
 
-    $self->save() if ($pri == 0); # urgh
+#    $self->save() if ($pri == 0); # urgh
 
     return undef unless ($pri == 2);
 
@@ -88,17 +90,24 @@ sub said {
     my ($command, $param) = split(/\s+/, $body, 2);
     $command = lc($command);
 
-    if ($command eq "!load") {
-        return $self->{Bot}->load($param);
-    } elsif ($command eq "!reload") {
-        return $self->{Bot}->reload($param);
-    } elsif ($command eq "!unload") {
-        return $self->{Bot}->unload($param);
-    } elsif ($command eq "!list") {
+    if ($command eq "!list") {
         return "Modules: ".join(", ", $self->{Bot}->handlers);
-
     }
-    return undef;
+    no warnings 'redefine';
+    eval '
+        if ($command eq "!load") {
+             $self->{Bot}->load($param);
+             die "success";
+        } elsif ($command eq "!reload") {
+             $self->{Bot}->reload($param);
+             die "success";
+        } elsif ($command eq "!unload") {
+             $self->{Bot}->unload($param);
+             die "success";
+        }
+    ';
+    $self->save();
+    return $@ if $@;
 }
 
 1;

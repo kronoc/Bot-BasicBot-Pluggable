@@ -1,5 +1,7 @@
 package Bot::BasicBot::Pluggable::Module::DNS;
 use Bot::BasicBot::Pluggable::Module::Base;
+use base qw(Bot::BasicBot::Pluggable::Module::Base);
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -7,7 +9,7 @@ Bot::BasicBot::Pluggable::Module::DNS
 
 =head1 SYNOPSIS
 
-Does DNS lookups for hosts
+Does DNS lookups for hosts.
 
 =head1 IRC USAGE
 
@@ -25,7 +27,6 @@ Commands:
 
 =cut
 
-use base qw(Bot::BasicBot::Pluggable::Module::Base);
 
 use Socket;
 
@@ -37,7 +38,7 @@ sub said {
     $command = lc($command);
 
     return unless ($pri == 2);
-    
+
     if ($command eq "nslookup") {
         my @addr = gethostbyname($param);
         my $straddr = inet_ntoa($addr[4]);
@@ -48,5 +49,10 @@ sub said {
         return "$param is $addr[0]";
     }
 }
+
+sub help {
+    return "Does DNS lookups. Commands: 'nslookup <name>' for the IP, 'dns <ip>' for a name,";
+}
+
 
 1;

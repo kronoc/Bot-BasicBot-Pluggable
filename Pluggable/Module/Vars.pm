@@ -1,6 +1,7 @@
 package Bot::BasicBot::Pluggable::Module::Vars;
 use Bot::BasicBot::Pluggable::Module::Base;
 use base qw(Bot::BasicBot::Pluggable::Module::Base);
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -8,7 +9,9 @@ Bot::BasicBot::Pluggable::Module::Vars
 
 =head1 SYNOPSIS
 
-Changes internal module variables.
+Changes internal module variables. Bot modules have variables that they can
+use to change their behaviour. This module, when loaded, gives people who
+are logged in the ability to change these variables from the IRC interface.
 
 =head1 IRC USAGE
 
@@ -45,8 +48,7 @@ sub said {
         return "Usage: !set <module> <var> <value>" unless $value;
         my $module = $self->{Bot}->module($mod);
         return "No such module" unless $module;
-        $module->{store}{vars}{$var} = $value;
-        $module->save();
+        $module->set($var, $value);
         return "Set.";
         
     } elsif ($command eq "!unset") {
@@ -54,8 +56,7 @@ sub said {
         return "Usage: !unset <module> <var>" unless $var;
         my $module = $self->{Bot}->module($mod);
         return "No such module" unless $module;
-        delete $module->{store}{vars}{$var};
-        $module->save();
+        $module->unset($var);
         return "Unset.";
         
     } elsif ($command eq "!vars") {
@@ -75,3 +76,5 @@ sub said {
 sub help {
     return "Usage: !set <module> <var> <value>, or !vars <module> to list vars for a module.";
 }
+
+1;

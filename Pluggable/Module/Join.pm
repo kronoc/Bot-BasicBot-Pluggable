@@ -1,6 +1,7 @@
 package Bot::BasicBot::Pluggable::Module::Join;
 use Bot::BasicBot::Pluggable::Module::Base;
 use base qw(Bot::BasicBot::Pluggable::Module::Base);
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -9,7 +10,8 @@ Bot::BasicBot::Pluggable::Module::Join
 =head1 SYNOPSIS
 
 Keeps track of what channels the bot wants to be in, will leave and join
-channels on request.
+channels on request. Load this module, and you can tell the bot 'join #channel',
+'leave #channel', and it will remember it's state.
 
 =head1 IRC USAGE
 
@@ -70,8 +72,8 @@ sub said {
         if ($self->{store}{channels}{lc($param)}) {
             delete $self->{store}{channels}{lc($param)};
             $self->{Bot}->part($param);
-            return "Leaving $param...";
             $self->save();
+            return "Leaving $param...";
         } else {
             return "I don't think I'm /in/ $param";
         } 

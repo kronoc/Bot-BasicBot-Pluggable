@@ -1,6 +1,7 @@
 package Bot::BasicBot::Pluggable::Module::Auth;
 use Bot::BasicBot::Pluggable::Module::Base;
 use base qw(Bot::BasicBot::Pluggable::Module::Base);
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -72,7 +73,7 @@ have admin permissions. This may not be a good idea.
 sub init {
     my $self = shift;
     unless ($self->{store}{admin}) {
-        $self->{store}{admin}{password} = "julia";
+        $self->{store}{admin}{password} = "julia"; # mmmm, defaults.
     }
 }
 
@@ -83,9 +84,11 @@ sub help {
 
 sub said {
     my ($self, $mess, $pri) = @_;
-    return unless ($pri == 1);
-
     my $body = $mess->{body};
+
+    return "Unknown admin command" if ($pri == 3 and $body and $body =~ /^!/);
+
+    return unless ($pri == 1);
 
     # system commands have to be directly addressed.
     return 0 unless $mess->{address};
@@ -103,6 +106,9 @@ sub said {
         if ($pass eq $self->{store}{$user}{password}) {
             $self->{auth}{$mess->{who}}{time} = time();
             $self->{auth}{$mess->{who}}{username} = $user;
+            if ($user eq "admin" and $pass eq "julia") {
+                return "Authernticated. But change the password - you're using the default.";
+            }
             return "Authenticated.";
         } else {
             return "Bad password";
@@ -138,7 +144,7 @@ sub said {
     } elsif ($body =~ /^!deluser/) {
         return "usage: deluser <username>";
 
-    } elsif ($body =~ /^!passwo?r?d\s+(\w+)\s+(\w+)/) {
+    } elsif ($body =~ /^!passw?o?r?d?\s+(\w+)\s+(\w+)/) {
         my $old_pass = $1;
         my $pass = $2;
         if ($self->authed($mess->{who})) {
@@ -154,7 +160,7 @@ sub said {
         } else {
             return "You need to authenticate.";
         }
-    } elsif ($body =~ /^!passwo?r?d/) {
+    } elsif ($body =~ /^!passw?o?r?d?/) {
         return "usage: !passwd <old password> <newpassword>";
 
     } elsif ($body =~ /^!users/) {
@@ -174,7 +180,9 @@ sub said {
 sub authed {
     my ($self, $username) = @_;
 
-    return 1 if ($self->{auth}{$username}{time} and $self->{auth}{$username}{time} + 3600 > time());
+    return 1 if ($self->{auth}{$username}{time}
+             and $self->{auth}{$username}{time} + 7200 > time());
+
     return 0;
     
 }

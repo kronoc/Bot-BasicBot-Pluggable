@@ -1,6 +1,7 @@
 package Bot::BasicBot::Pluggable::Module::Karma;
 use Bot::BasicBot::Pluggable::Module::Base;
 use base qw(Bot::BasicBot::Pluggable::Module::Base);
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -36,57 +37,59 @@ Lists the good and bad things said about <thing>
 
 =cut
 
-sub init {
-    my $self = shift;
-
-    # the Blog module requires a mysql database
-    my $dsn = "DBI:mysql:database=$self->{store}{vars}{db_name}";
-    my $user = $self->{store}{vars}{db_user};
-    my $pass = $self->{store}{vars}{db_pass};
-
-    $self->{DB} = DBI->connect($dsn, $user, $pass)
-        or warn "Can't connect to database";
-
-}
-
 sub said {
     my ($self, $mess, $pri) = @_;
     my $body = $mess->{body};
 
-    return unless $self->{DB};
-
     my ($command, $param) = split(/\s+/, $body, 2);
     $command = lc($command);
-    $param =~ s/\?$// if $param;
+    $param =~ s/\?*\s*$// if $param;
     
     if ($command eq "karma" and $pri == 2 and $param) {
-        return "$param has karma ".$self->get_karma($param);
+        return "$param has karma of ".$self->get_karma($param);
     } elsif ($command eq "explain" and $pri == 2 and $param) {
         $param =~ s/^karma\s+//i;
         my ($karma, $good, $bad) = $self->get_karma($param);
-        my $reply = "$param has karma ".$self->get_karma($param).". ";
-        $reply .= "good: ".(join(", ", @$good) || "nothing").". ";
-        $reply .= "bad: ".(join(", ", @$bad) || "nothing").".";
+        $self->trim_list($good, 3);
+        $self->trim_list($bad, 3);
+
+        my $reply = "";
+        $reply .= "positive: ".(join(", ", @$good) || "nothing").". ";
+        $reply .= "negative: ".(join(", ", @$bad) || "nothing").". ";
+        $reply .= "overall: ".$self->get_karma($param);
+
         return $reply;
     }
 
-    if ($pri == 0 and (($body =~ /(\w+)\+\+/) or ($body =~ /\(([\w\s]+)\)\+\+/))) {
-        print STDERR "$1++\n";
-        $self->add_karma($1, 1, $', $mess->{who});
-    } elsif (($body =~ /(\w+)\-\-/) or ($body =~ /\(([\w\s]+)\)\-\-/)) {
-        print STDERR "$1--\n";
-        $self->add_karma($1, 0, $', $mess->{who});
-    }    
+    if ($pri == 0) {
+        if (($body =~ /(\w+)\+\+\s*#?\s*/) or ($body =~ /\(([\w\s]+)\)\+\+\s*#?\s*/)) {
+            print STDERR "$1++\n";
+            $self->add_karma($1, 1, $', $mess->{who});
+        } elsif (($body =~ /(\w+)\-\-/) or ($body =~ /\(([\w\s]+)\)\-\-/)) {
+            print STDERR "$1--\n";
+            $self->add_karma($1, 0, $', $mess->{who});
+        }    
+    }
+}
+
+sub trim_list {
+    my ($self, $list, $count) = @_;
+    
+    if (scalar(@$list) > $count) {
+        @$list = splice(@$list, 0, -1*$count);
+    }
+
 }
 
 sub get_karma {
     my ($self, $object) = @_;
-    my $query = $self->{DB}->prepare("SELECT * FROM karma WHERE object=?");
-    $query->execute($object);
-    my $karma = 0;
+    my @changes = @{$self->{store}{karma}{$object}};
+
     my @good;
     my @bad;
-    while (my $row = $query->fetchrow_hashref) {
+    my $karma = 0;
+
+    for my $row (@changes) {
         if ($row->{positive}) {
             $karma++;
             push(@good, $row->{reason}) if $row->{reason};
@@ -105,9 +108,9 @@ sub get_karma {
         
 sub add_karma {
     my ($self, $object, $good, $reason, $who) = @_;
-    $reason =~ s/^\s*#\s*//;
-    my $query = $self->{DB}->prepare("INSERT INTO karma (create_time, create_who, object, positive, reason) VALUES (?, ?, ?, ?, ?);");
-    $query->execute(time, $who, $object, $good, $reason);
+    my $row = { reason=>$reason, who=>$who, timestamp=>time, positive=>$good };
+    push @{$self->{store}{karma}{$object}}, $row;
+    $self->save();
     return;
 }
     

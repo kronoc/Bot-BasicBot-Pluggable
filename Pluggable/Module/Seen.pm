@@ -1,6 +1,7 @@
 package Bot::BasicBot::Pluggable::Module::Seen;
 use Bot::BasicBot::Pluggable::Module::Base;
 use base qw(Bot::BasicBot::Pluggable::Module::Base);
+our $VERSION = '0.05';
 
 =head1 NAME
 
@@ -45,6 +46,8 @@ sub said {
     if ($pri == 0) {
         $self->{store}{seen}{lc($mess->{who})}{time} = time;
         $self->{store}{seen}{lc($mess->{who})}{channel} = $mess->{channel};
+        $self->{store}{seen}{lc($mess->{who})}{what} =
+            $mess->{channel} ne 'msg' ? $mess->{body} : '<private message>';
         $self->save();
         return undef;
     }
@@ -61,8 +64,9 @@ sub said {
             return "Sorry, I haven't seen $who";
         }
         my $diff = time - $seen->{time};
-        my $string = secs_to_string($diff);
-        return "I last saw $who $string in $seen->{channel}";
+        my $time_string = secs_to_string($diff);
+        $mess->{address} = undef;
+        return "$who was last seen in $seen->{channel} $time_string saying '$seen->{what}'";
 
     } elsif ($command eq "hide" and $mess->{address}) {
         $self->{store}{hidden}{lc($mess->{who})}++;
@@ -81,6 +85,8 @@ sub said {
 sub secs_to_string {
     my $secs = shift;
 
+    # Hopefully never used. But if the seen time is in the future,
+    # catch it.
     my $weird = 0;
     if ($secs < 0) {
         $secs = -$secs;
