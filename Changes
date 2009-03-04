@@ -1,75 +1,138 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
+0.6 2009/03/04
+
+It's been.. uh.. 4 years. There are tickets in RT that simply don't apply to
+the current codebase. Personally, I never work on this module, use it for one
+small thing that never changes, and have started to really dislike programming
+in perl recently. Thus I'm just going to release trunk as-is. It's got a lot
+of changes. Things might break. Sorry. I dislike other people doing this,
+and I dislike _me_ doing this, but I see very few other options at this point.
+ 
+I'm putting all the code in a github repository at
+
+http://github.com/jerakeen/bot-basicbot-pluggable
+
+if people want to actually track what goes on. Anyone want to take B::B::P
+over?
+
+--
+
+This is the "Morbus release". Why the "Morbus release"?
+Quite simply because he did everything you see below.
+You can chastise him for his ego at http://disobey.com/.
+
+  - Revised documentation for Pluggable.pm and Module.pm.
+  - Auth: Revised documentation, switched to admin() not said().
+  - DNS: Revised documentation, switched to told() not said().
+  - Google:
+    - Revised documentation, switched to told() not said().
+    - Removed deprecated Net::Google ie() and oe() methods.
+    - Default language restriction set to just 'en'; removed 'fr'.
+    - Removed explicit starts_at of 0, which is the default.
+    - New option added: num_results (default: 3).
+    - New option added: languages (default: en).
+    - New option added: require_addressing (default: 1).
+  - Join: Revised documentation, switched to told() not said().
+  - Karma:
+    - Revised documentation, switched to told() and seen().
+    - Replaced fisher_yates with newer version from Perl 5.8.
+    - Fixed a bunch of little nigglies here and there.
+    - New option added: num_comments (default: 3).
+    - New option added: show_givers (default: 1).
+    - New option added: ignore_selfkarma (default: 1).
+    - If only "karma", we assume $mess->{who} now.
+    - Now understands "<botname>++" and "<botname>--";
+  - Loader: Revised documentation, switched to told() not said().
+  - Seen:
+    - Revised documentation, switched to seen() and told().
+    - Echoed $who is now what the user typed, not lc'd version.
+    - New option added: allow_hiding (default: 1).
+  - Title: Revised documentation, switched to admin() not said().
+  - Vars:
+    - Revised documentation, switched to told() not said().
+    - Removed the check for the existence of $value on a !set. This
+      check would fail whenever anyone tried to set the $value to 0,
+      which makes perfect sense when you're trying to turn off a boolean'd
+      feature. !unset doesn't work because that entirely deletes the 
+      $variable, which means it'll be reset to the default the next
+      time the module is reloaded or the bot is restarted.
+  - Revised documentation for Store.pm and Store/* modules.
+  - Infobot:
+    - Revised all the documentation, added more examples.
+    - Removed the 'ask' option; it was never actually used.
+    - Renamed option 'passive_ask' to 'passive_answer'. More sense.
+    - Added a small but decent list of common stopwords.
+    - New option: num_results (for "search for <term>"; default 20).
+    - New option: require_question ("water?" or "water"; default 1).
+    - Entirely removed the "literal $object" feature.
+    - New option: min_length (minimum $object length; default 3).
+    - New option: max_length (maximum $object length; default 25).
+    - New option: unknown_responses (random list of "No clue." responses).
+    - You can now replace facts with "no, $bot, $object is..." too.
+    - $who in a factoid is now replaced by $mess->{who}.
+    - Stopwords were NOT being stopped on word boundaries. Fixed.
+    - "no, $bot, $object is also $fact" now works for appending.
+    - Added handling of "my" as in "my cat is named chloe".
+
 0.50 2004/01/18
-  - Moved Bot::BasicBot::Pluggble::Module::Base to B::B::P::Module.pm, and
-    added Base.pm as an empty subclass, for neatness.
+  - Moved Bot::BasicBot::Pluggble::Module::Base to B::B::P::Module.pm,
+    and added Base.pm as an empty subclass, for neatness.
   - Documented the object store methods better.
-  - changed all the core modules to use the proget get/set store methods
+  - Changed all core modules to use the proget get/set store methods.
   - Loader now uses the standard store system.
   - Installed shell script to run B::B::P.
-  - The Infobot module can now passsively learn and passively answer questions
-    (ie without requiring direct addressing) and you can set these options
-    seperately.
-  - The storage system is decently abstracted out, and has a default that
-    does the same thing as the last one.
-  - Gave the bot a default charset of utf8, because I'm a fan of utf8
-  - utterly changed the infobot back-end store system. Updating it will be
-    a pain, I'm sorry, but the last one really sucked. Re-wrote the infobot
+  - The Infobot module can now passively learn and passively answer questions
+    (without direct addressing) and you can set these options seperately.
+  - The storage system is decently abstracted out, and has a
+    default that does the same thing as the last one.
+  - Gave the bot a default charset of utf8, because I'm a fan of utf8.
+  - Utterly changed the Infobot back-end store system. Updating it will be
+    a pain, I'm sorry, but the last one really sucked. Re-wrote the Infobot
     module to be _readable_, or at least slightly less nasty than before.
     
 0.30
-  - Improved docs
-  - Synced version number with Bot::BasicBot again
-  - Added NINJA support
-  - Moved to Module::Build-based module layout
-  - Huge docs improvement, based on feedback from people who clearly had no
-    idea what I was smoking at the time.
-  - Decent examples in examples/, and copies on the web page for people
-    who use CPAN
-  - Removed the Blog and Shout modules - blog is to be spun off into a
-    seperate module, Shout was just stupid.
-  - Support for loading modules from a 'modules' folder in cwd as well
-    as from the main perl lib path.
-  - The bot is a lot less case-sensitive. Still sensitive for loading modules,
-    but all the help, etc commands are more friendly.
-  - Removed 'reply' method (now in Bot::BasicBot)
-  - Slight module API changes, nothing significant, and I don't know of any
-    3rd party modules anyway:
+  - Improved docs.
+  - Synced version number with Bot::BasicBot again.
+  - Added NINJA support.
+  - Moved to Module::Build-based module layout.
+  - Huge docs improvement, based on feedback from people who
+    clearly had no idea what I was smoking at the time.
+  - Decent examples in examples/, and web page copies for people who use CPAN.
+  - Removed Blog and Shout modules - Blog to be spun off
+    into a seperate module, Shout was just stupid.
+  - Support for loading modules from 'Modules' in cwd as well as main lib path.
+  - The bot is a lot less case-sensitive. Still sensitive for loading
+    modules, but all the help, etc commands are more friendly.
+  - Removed 'reply' method (now in Bot::BasicBot).
+  - Slight module API changes, nothing significant:
     - Added a 'tick' callback that happens every 5 seconds.
     - Added a 'reply' local method that mirrors the Bot::BasicBot reply.
     - Added a 'say' method that calls the Bot::BasicBot say.
-    - Added a very simple 'tell' method for simple statements
-    - Added an 'emoted' callback that works identically to the 'said'
-      callback
-    - Added a 'chanjoin' callback, called when someone joins a channel
-    - Added a 'chanpart' callback, called when someone leaves a channel
+    - Added a very simple 'tell' method for simple statements.
+    - Added an 'emoted' callback that works identically to 'said'.
+    - Added a 'chanjoin' callback, called when someone joins a channel.
+    - Added a 'chanpart' callback, called when someone leaves a channel.
   - Module changes (other than doc improvements):
-    - Auth
-      - Fixed silly bug that meant you didn't actually need to auth
-      - Now requires direct addressing
-      - Smarter about ignoring things that aren't admin commands
-    - Blog
-      - Removed. Look for Bot::BasicBot::Pluggable::Module::Blog, coming
-        soon!
-    - Spell
-      - Fixed a spelling mistake
-    - Infobot
-      - Fixed a bunck of annoying parser bugs. I need to re-write the whole
-        thing soon, though.
-    - Karma
-      - Removed case-sensitivity in karma objects.
+    - Auth:
+      - Fixed silly bug that meant you didn't actually need to auth.
+      - Smarter about ignoring things that aren't admin commands.
+      - Now requires direct addressing.
+    - Blog: removed. Look for Bot::BasicBot::Pluggable::Module::Blog.
+    - Spell: Fixed a spelling mistake.
+    - Infobot: Fixed annoying parser bugs. Needs to re-write whole thing soon.
+    - Karma: Removed case-sensitivity in karma objects.
  
-0.05
-  - Better documentation
+0.05 2003/06/09
+  - Better documentation.
   - Vars changable through better interface.
 
-0.04
-  - release to coincide with Simon's release of Bot::Basicbot,
-    version number bumped to match.
-  - therefore the first release that actually Worked out the box.
+0.04 2003/03/05
+  - Release coincides with Simon's release of Bot::Basicbot, version matched.
+  - Therefore the first release that actually Worked out the box.
 
-0.011 Mon Feb 24 18:00:00 2003
+0.011 2003/02/24
   - oops.
 
-0.01  Mon Feb 24 17:08:02 2003
-  - original version; created by h2xs 1.22
+0.01 2003/02/24
+  - original version; created by h2xs 1.22.
