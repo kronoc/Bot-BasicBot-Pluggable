@@ -3,7 +3,6 @@ NAME
 
 SYNOPSIS
   Creating the bot module
-
       # with all defaults.
       my $bot = Bot::BasicBot->new();
 
@@ -25,7 +24,6 @@ SYNOPSIS
                     );
 
   Running the bot (simple)
-
     There's a shell script installed to run the bot.
 
       $ bot-basicbot-pluggable.pl --nick MyBot --server irc.perl.org
@@ -34,7 +32,6 @@ SYNOPSIS
     Bot::BasicBot::Pluggable::Module::Auth for further details.
 
   Running the bot (advanced)
-
     There are two useful ways to create a Pluggable bot. The simple way is:
 
       # Load some useful modules.
@@ -90,8 +87,8 @@ DESCRIPTION
     now is a generalised framework for writing infobot-type bots that lets
     you keep each specific function seperate. You can have seperate modules
     for factoid tracking, 'seen' status, karma, googling, etc. Included
-    default modules are below. Use `perldoc
-    Bot::BasicBot::Pluggable::Module::<module name'> for help on their
+    default modules are below. Use "perldoc
+    Bot::BasicBot::Pluggable::Module::<module name"> for help on their
     individual terminology.
 
       Auth    - user authentication and admin access.
@@ -109,20 +106,20 @@ DESCRIPTION
     object and tell it to load various modules (or, alternatively, load just
     the Loader module and then interactively load modules via an IRC
     /query). The modules receive events when the bot sees things happen and
-    can, in turn, respond. See `perldoc Bot::BasicBot::Pluggable::Module'
+    can, in turn, respond. See "perldoc Bot::BasicBot::Pluggable::Module"
     for the details of the module API.
 
 METHODS
     new(key => value, ...)
-        Create a new Bot. Identical to the `new' method in Bot::BasicBot.
+        Create a new Bot. Identical to the "new" method in Bot::BasicBot.
 
     load($module)
-        Load a module for the bot by name from `./modules/ModuleName.pm' if
+        Load a module for the bot by name from "./modules/ModuleName.pm" if
         that file exists, and falling back to
-        `Bot::BasicBot::Pluggable::Module::$module' if not.
+        "Bot::BasicBot::Pluggable::Module::$module" if not.
 
     reload($module)
-        Reload the module `$module' - equivalent to unloading it (if it's
+        Reload the module $module - equivalent to unloading it (if it's
         already loaded) and reloading it. Will stomp the old module's
         namespace - warnings are expected here. Not toally clean - if you're
         experiencing odd bugs, restart the bot if possible. Works for minor
@@ -132,7 +129,7 @@ METHODS
         Removes a module from the bot. It won't get events any more.
 
     module($module)
-        Returns the handler object for the loaded module `$module'. Used,
+        Returns the handler object for the loaded module $module. Used,
         e.g., to get the 'Auth' hander to check if a given user is
         authenticated.
 
@@ -154,8 +151,7 @@ METHODS
         Returns the bot's object store; see Bot::BasicBot::Pluggable::Store.
 
     dispatch($method_name, $method_params)
-        Call the named `$method' on every loaded module with that method
-        name.
+        Call the named $method on every loaded module with that method name.
 
     help
         Returns help for the ModuleName of message 'help ModuleName'. If no
@@ -166,8 +162,8 @@ METHODS
         to get it back.
 
 BUGS
-    During the `make', `make test', `make install' process, POE will moan
-    about its kernel not being run. This is a `Bot::BasicBot problem',
+    During the "make", "make test", "make install" process, POE will moan
+    about its kernel not being run. This is a "Bot::BasicBot problem",
     apparently. Reloading a module causes warnings as the old module gets
     its namespace stomped. Not a lot you can do about that. All modules must
     be in Bot::Pluggable::Module:: namespace. Well, that's not really a bug.

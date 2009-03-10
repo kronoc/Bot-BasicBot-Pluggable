@@ -1,12 +1,12 @@
 ---
 name: Bot-BasicBot-Pluggable
-version: 0.60
+version: 0.70
 author:
   - 'Tom Insam <tom@jerakeen.org>'
 abstract: extended simple IRC bot for pluggable modules
 license: perl
 resources:
-  license: http://dev.perl.org/licenses/
+  license: ~
 requires:
   Bot::BasicBot: 0.30
   DBD::SQLite: 0
@@ -23,7 +23,7 @@ recommends:
 provides:
   Bot::BasicBot::Pluggable:
     file: lib/Bot/BasicBot/Pluggable.pm
-    version: 0.60
+    version: 0.70
   Bot::BasicBot::Pluggable::Module:
     file: lib/Bot/BasicBot/Pluggable/Module.pm
   Bot::BasicBot::Pluggable::Module::Auth:
@@ -56,7 +56,7 @@ provides:
     file: lib/Bot/BasicBot/Pluggable/Store/Deep.pm
   Bot::BasicBot::Pluggable::Store::Storable:
     file: lib/Bot/BasicBot/Pluggable/Store/Storable.pm
-generated_by: Module::Build version 0.31
+generated_by: Module::Build version 0.31012
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
   version: 1.2
