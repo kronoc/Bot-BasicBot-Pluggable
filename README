@@ -114,9 +114,10 @@ METHODS
         Create a new Bot. Identical to the "new" method in Bot::BasicBot.
 
     load($module)
-        Load a module for the bot by name from "./modules/ModuleName.pm" if
-        that file exists, and falling back to
-        "Bot::BasicBot::Pluggable::Module::$module" if not.
+        Load a module for the bot by name from "./ModuleName.pm" or
+        "./modules/ModuleName.pm" in that order if one of these files exist,
+        and falling back to "Bot::BasicBot::Pluggable::Module::$module" if
+        not.
 
     reload($module)
         Reload the module $module - equivalent to unloading it (if it's

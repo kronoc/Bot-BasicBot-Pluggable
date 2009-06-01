@@ -1,6 +1,6 @@
 ---
 name: Bot-BasicBot-Pluggable
-version: 0.70
+version: 0.71
 author:
   - 'Tom Insam <tom@jerakeen.org>'
 abstract: extended simple IRC bot for pluggable modules
@@ -23,7 +23,7 @@ recommends:
 provides:
   Bot::BasicBot::Pluggable:
     file: lib/Bot/BasicBot/Pluggable.pm
-    version: 0.70
+    version: 0.71
   Bot::BasicBot::Pluggable::Module:
     file: lib/Bot/BasicBot/Pluggable/Module.pm
   Bot::BasicBot::Pluggable::Module::Auth:
