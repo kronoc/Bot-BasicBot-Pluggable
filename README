@@ -9,8 +9,8 @@ SYNOPSIS
       # with useful options. pass any option
       # that's valid for Bot::BasicBot.
       my $bot = Bot::BasicBot::Pluggable->new(
-  
-                          channels => ["#bottest"],
+      
+                      channels => ["#bottest"],
                           server   => "irc.example.com",
                           port     => "6667",
 
