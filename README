@@ -9,8 +9,8 @@ SYNOPSIS
       # with useful options. pass any option
       # that's valid for Bot::BasicBot.
       my $bot = Bot::BasicBot::Pluggable->new(
-      
-                      channels => ["#bottest"],
+  
+                          channels => ["#bottest"],
                           server   => "irc.example.com",
                           port     => "6667",
 
@@ -36,8 +36,8 @@ SYNOPSIS
 
       # Load some useful modules.
       my $infobot_module = $bot->load("Infobot");
-      my $google_module = $bot->load("Google");
-      my $seen_module = $bot->load("Seen");
+      my $google_module  = $bot->load("Google");
+      my $seen_module    = $bot->load("Seen");
 
       # Set the Google key (see http://www.google.com/apis/).
       $google_module->set("google_key", "some google key");

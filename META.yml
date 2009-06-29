@@ -1,13 +1,13 @@
 ---
 name: Bot-BasicBot-Pluggable
-version: 0.74
+version: 0.76
 author:
   - 'Tom Insam <tom@jerakeen.org>'
   - 'Mario Domgoergen <mario@domgoergen.com>'
 abstract: extended simple IRC bot for pluggable modules
 license: perl
 resources:
-  license: http://dev.perl.org/licenses/
+  license: ~
   repository: http://github.com/jerakeen/bot-basicbot-pluggable
 requires:
   Bot::BasicBot: 0.30
@@ -25,7 +25,7 @@ recommends:
 provides:
   Bot::BasicBot::Pluggable:
     file: lib/Bot/BasicBot/Pluggable.pm
-    version: 0.74
+    version: 0.76
   Bot::BasicBot::Pluggable::Module:
     file: lib/Bot/BasicBot/Pluggable/Module.pm
   Bot::BasicBot::Pluggable::Module::Auth:
@@ -56,12 +56,17 @@ provides:
     file: lib/Bot/BasicBot/Pluggable/Store/DBI.pm
   Bot::BasicBot::Pluggable::Store::Deep:
     file: lib/Bot/BasicBot/Pluggable/Store/Deep.pm
+  Bot::BasicBot::Pluggable::Store::Memory:
+    file: lib/Bot/BasicBot/Pluggable/Store/Memory.pm
   Bot::BasicBot::Pluggable::Store::Storable:
     file: lib/Bot/BasicBot/Pluggable/Store/Storable.pm
   Test::Bot::BasicBot::Pluggable:
     file: lib/Test/Bot/BasicBot/Pluggable.pm
     version: 0.1
-generated_by: Module::Build version 0.33
+  Test::Bot::BasicBot::Pluggable::Store:
+    file: lib/Test/Bot/BasicBot/Pluggable/Store.pm
+    version: 0.1
+generated_by: Module::Build version 0.31012
 meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.4.html
-  version: 1.4
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2

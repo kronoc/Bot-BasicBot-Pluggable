@@ -42,11 +42,17 @@ use strict;
 
 sub connected {
     my $self = shift;
+    my $channels = $self->get("channels") || [];
 
-    my @channels = split(/\s+/, $self->get("channels") || "");
-    for (@channels) {
+    ## If we are not a array reference, we are problably the old
+    ## string format ... trying to convert
+    if ( not ref($channels) eq 'ARRAY' ) {
+        $channels = [ split( /\s+/, $channels ) ];
+    }
+
+    for ( @{$channels} ) {
         print "Joining $_.\n";
-        $self->{Bot}->join($_);
+        $self->bot->join($_);
     }
 }
 
@@ -72,23 +78,41 @@ sub told {
         return "Ok.";
 
     } elsif ($command eq "channels") {
-        return "I'm in ".$self->get("channels").".";
+	my @channels = $self->bot->channels;
+	my $channel_num = scalar @channels;
+	if ($channel_num == 0) {
+		return "I'm not in any channel.";
+	} elsif ( $channel_num == 1 ) {
+		return "I'm in " . $channels[0] . "." ;
+	} elsif ( $channel_num == 2 ) {
+		return "I'm in " . $channels[0] . " and " . $channels[1] . ".";
+	} else {
+        	return "I'm in ". join(', ', @channels[0 .. $#channels-1]) . " and $channels[-1].";
+	}
+    }
+}
+
+sub chanjoin {
+    my ( $self, $mess ) = @_;
+    if ( $mess->{who} eq $self->bot->nick ) {
+        $self->set( channels => $self->bot->channels );
+    }
+}
+
+sub chanpart {
+    my ( $self, $mess ) = @_;
+    if ( $mess->{who} eq $self->bot->nick ) {
+        $self->set( channels => $self->bot->channels );
     }
 }
 
 sub add_channel {
     my ($self, $channel) = @_;
-    my %channels = map { $_ => 1 } split(/\s+/, $self->get("channels"));
-    $channels{$channel} = 1;
-    $self->set( channels => join(" ", keys %channels) );
     $self->bot->join($channel);
 }
 
 sub remove_channel {
     my ($self, $channel) = @_;
-    my %channels = map { $_ => 1 } split(/\s+/, $self->get("channels"));
-    delete $channels{$channel};
-    $self->set( channels => join(" ", keys %channels) );
     $self->bot->part($channel);
 }
 

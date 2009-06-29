@@ -41,8 +41,8 @@ There are two useful ways to create a Pluggable bot. The simple way is:
 
   # Load some useful modules.
   my $infobot_module = $bot->load("Infobot");
-  my $google_module = $bot->load("Google");
-  my $seen_module = $bot->load("Seen");
+  my $google_module  = $bot->load("Google");
+  my $seen_module    = $bot->load("Seen");
 
   # Set the Google key (see http://www.google.com/apis/).
   $google_module->set("google_key", "some google key");
@@ -116,7 +116,7 @@ package Bot::BasicBot::Pluggable;
 use warnings;
 use strict;
 
-our $VERSION = '0.74';
+our $VERSION = '0.76';
 
 use POE;
 use Bot::BasicBot;
@@ -150,7 +150,15 @@ sub store_from_hashref {
     # calculate the class we're going to use. If you pass a full
     # classname as the type, use that class, otherwise assume it's
     # a B::B::Store:: subclass.
-    my $store_class = delete $store->{type} || "DBI";
+
+    my $store_class;
+
+    if (ref($store)) {
+    	$store_class = delete $store->{type} || "DBI";
+    } else {
+	$store_class = $store;
+    }
+
     $store_class = "Bot::BasicBot::Pluggable::Store::$store_class"
       unless $store_class =~ /::/;
 
@@ -159,7 +167,13 @@ sub store_from_hashref {
     die "Couldn't load $store_class - $@" if $@;
 
     print STDERR "Loading $store_class\n" if $self->{verbose};
-    $self->store( $store_class->new(%{$store}) );
+
+    if (ref($store)) {
+    	$self->store( $store_class->new(%{$store}) );
+    } else {
+    	$self->store( $store_class->new() );
+    }
+    
     die "Couldn't init a $store_class store\n" unless $self->store;
 
     $self->store;
