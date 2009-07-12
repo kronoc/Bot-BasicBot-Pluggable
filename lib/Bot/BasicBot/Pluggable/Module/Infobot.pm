@@ -87,7 +87,7 @@ use warnings;
 use strict;
 
 use Data::Dumper;
-use LWP::Simple ();
+use LWP::UserAgent ();
 use URI;
 
 # this one is a complete bugger to build
@@ -97,17 +97,20 @@ our $HAS_XML_FEED = $@ ? 0 : 1;
 sub init {
     my $self = shift;
     $self->config({
-        user_allow_searching  => 0,
-        user_min_length       => 3,
-        user_max_length       => 25,
-        user_num_results      => 20,
-        user_passive_answer   => 0,
-        user_passive_learn    => 0,
-        user_require_question => 1,
-        user_stopwords => "here|how|it|something|that|this|what|when|where|which|who|why",
-        user_unknown_responses => "Dunno.|I give up.|I have no idea.|No clue. Sorry.|Search me, bub.|Sorry, I don't know.",
-        db_version => "1",
+            user_allow_searching  => 0,
+            user_min_length       => 3,
+            user_max_length       => 25,
+            user_num_results      => 20,
+            user_passive_answer   => 0,
+            user_passive_learn    => 0,
+            user_require_question => 1,
+            user_http_timeout     => 10,
+            user_rss_items        => 5,
+            user_stopwords => "here|how|it|something|that|this|what|when|where|which|who|why",
+            user_unknown_responses => "Dunno.|I give up.|I have no idea.|No clue. Sorry.|Search me, bub.|Sorry, I don't know.",
+            db_version => "1",
     });
+## Please see file perltidy.ERR
 
     # record what we've asked other bots.
     $self->{remote_infobot} = {};
@@ -437,15 +440,29 @@ sub parseFeed {
 
     my @items;
     eval {
-        my $feed = XML::Feed->parse( URI->new( $url ) );
-        die XML::Feed->errstr() . "\n" unless $feed;
-        @items = map { $_->title } $feed->entries;
+        my $ua = LWP::UserAgent->new();
+        $ua->timeout( $self->get('user_http_timeout') );
+        $ua->env_proxy;
+        my $feed;
+        my $response = $ua->get($url);
+        if ( $response->is_success ) {
+            $feed = XML::Feed->parse( \$response->content() )
+              or die XML::Feed->errstr . "\n";
+        }
+        else {
+            die $response->status_line() . "\n";
+        }
+        my @entries   = $feed->entries();
+        my $max_items = $self->get('user_rss_items');
+        if ($max_items and $max_items < @entries) {
+            splice( @entries, $max_items );
+        }
+        @items = map { $_->title } @entries;
     };
 
     if ($@) {
 	chomp $@;
     	return "<< Error parsing RSS from $url: $@ >>";
-        #return "Sorry. Unable to retrieve factoid." if $@;
     }
 
     my $ret;
@@ -535,13 +552,19 @@ Defaults to 0.
 
 Searching on large factoid lists is ... problematic.
 
+=item http_timeout
 
+Time in seconds for an http request to timeout. When this value is
+set to a very high value, a slow site can disconnect a bot by
+blocking it. Defaults to 10.
+
+=item rss_items
+
+Maximal numbers of items returns when using RSS feeds. Defaults to 5.
 
 =back
 
 =head1 BUGS
-
-If we request an RSS feed that takes a long time, we'll timeout and drop off.
 
 "is also" doesn't work on <reply>s (ie. "<bot> cheetahs! or <reply>monkies.")
 
@@ -550,8 +573,6 @@ If we request an RSS feed that takes a long time, we'll timeout and drop off.
 The pipe syntax for random replies doesn't actually work. At all. Um.
 
 We should probably make a "choose_random_response" function.
-
-There needs to be a settable limit on how many RSS items to return.
 
 "<bot>?" fails, due to removal of <bot> name from $mess->body.
 
