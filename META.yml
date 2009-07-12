@@ -1,6 +1,6 @@
 ---
 name: Bot-BasicBot-Pluggable
-version: 0.77
+version: 0.78
 author:
   - 'Tom Insam <tom@jerakeen.org>'
   - 'Mario Domgoergen <mario@domgoergen.com>'
@@ -26,7 +26,7 @@ recommends:
 provides:
   Bot::BasicBot::Pluggable:
     file: lib/Bot/BasicBot/Pluggable.pm
-    version: 0.77
+    version: 0.78
   Bot::BasicBot::Pluggable::Module:
     file: lib/Bot/BasicBot/Pluggable/Module.pm
   Bot::BasicBot::Pluggable::Module::Auth:
