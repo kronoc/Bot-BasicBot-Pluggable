@@ -1,5 +1,13 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
+0.80 2009/08/15
+
+  - new command line bot
+    
+    big rewrite of the command line bot with the help of MooseX::Getopt
+    and MooseX::SimpleConfig. It should be possible to call a lot of
+    aspects of the pluggable infrastructure without writing perl code.
+
 0.79 2009/07/12
   - the need-more-sleep-release ... sorry, that's the last for today
   - replied was never called ... now we put it back in front again

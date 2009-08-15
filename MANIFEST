@@ -42,3 +42,9 @@ t/04karma.t
 t/05infobot.t
 t/06title.t
 t/test.rss
+lib/App/Bot/BasicBot/Pluggable.pm
+t/07app_defaults.t
+t/08app_commandline.t
+t/09app_configfile.t
+t/configfiles/bot-basicbot-pluggable.yaml
+t/configfiles/empty.yaml

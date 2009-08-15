@@ -8,17 +8,23 @@ Module::Build->new(
     module_name => 'Bot::BasicBot::Pluggable',
     license     => 'perl',
     requires    => {
-        'perl'              => '5.8.0',
-        'Bot::BasicBot'     => '0.30',
-        'Test::More'        => '0.01',
-        'URI::Title'        => '0.1',
-        'URI::Find::Simple' => 0,
-        'DBI'               => 0,
-        'DBD::SQLite'       => 0,
-        'Getopt::Long'      => 0,
-        'DBM::Deep'         => 0,
-        'Text::Unidecode'   => 0,
-	'LWP::UserAgent'    => 0,
+        'Bot::BasicBot'        => '0.30',
+        'Config::Find'         => 0,
+        'DBD::SQLite'          => 0,
+        'DBI'                  => 0,
+        'DBM::Deep'            => 0,
+        'Getopt::Long'         => 0,
+	'List::MoreUtils'      => 0,
+        'LWP::UserAgent'       => 0,
+	'Module::Pluggable'    => 0,
+        'Moose'                => 0,
+        'MooseX::Getopt'       => 0,
+        'MooseX::SimpleConfig' => 0,
+        'perl'                 => '5.8.0',
+        'Test::More'           => '0.01',
+        'Text::Unidecode'      => 0,
+        'URI::Find::Simple'    => 0,
+        'URI::Title'           => '0.1',
     },
     recommends         => { 'XML::Feed' => 0, },
     script_files       => [ 'bin/bot-basicbot-pluggable', ],
@@ -26,9 +32,8 @@ Module::Build->new(
     create_readme      => 1,
     meta_merge         => {
         resources => {
-            repository => 'http://github.com/jerakeen/bot-basicbot-pluggable',
+            repository => 'http://github.com/mdom/bot-basicbot-pluggable',
         },
-        author => ['Mario Domgoergen <mario@domgoergen.com>']
     }
 )->create_build_script;
 

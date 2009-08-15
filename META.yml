@@ -1,21 +1,26 @@
 ---
 name: Bot-BasicBot-Pluggable
-version: 0.79
+version: 0.80
 author:
-  - 'Tom Insam <tom@jerakeen.org>'
-  - 'Mario Domgoergen <mario@domgoergen.com>'
+  - 'Mario Domgoergen <mdom@cpan.org>'
 abstract: extended simple IRC bot for pluggable modules
 license: perl
 resources:
   license: ~
-  repository: http://github.com/jerakeen/bot-basicbot-pluggable
+  repository: http://github.com/mdom/bot-basicbot-pluggable
 requires:
   Bot::BasicBot: 0.30
+  Config::Find: 0
   DBD::SQLite: 0
   DBI: 0
   DBM::Deep: 0
   Getopt::Long: 0
   LWP::UserAgent: 0
+  List::MoreUtils: 0
+  Module::Pluggable: 0
+  Moose: 0
+  MooseX::Getopt: 0
+  MooseX::SimpleConfig: 0
   Test::More: 0.01
   Text::Unidecode: 0
   URI::Find::Simple: 0
@@ -24,9 +29,11 @@ requires:
 recommends:
   XML::Feed: 0
 provides:
+  App::Bot::BasicBot::Pluggable:
+    file: lib/App/Bot/BasicBot/Pluggable.pm
   Bot::BasicBot::Pluggable:
     file: lib/Bot/BasicBot/Pluggable.pm
-    version: 0.79
+    version: 0.80
   Bot::BasicBot::Pluggable::Module:
     file: lib/Bot/BasicBot/Pluggable/Module.pm
   Bot::BasicBot::Pluggable::Module::Auth:

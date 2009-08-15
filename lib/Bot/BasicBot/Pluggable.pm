@@ -116,7 +116,7 @@ package Bot::BasicBot::Pluggable;
 use warnings;
 use strict;
 
-our $VERSION = '0.79';
+our $VERSION = '0.80';
 
 use POE;
 use Bot::BasicBot;
@@ -499,7 +499,7 @@ Google.pm needs L<Net::Google>. See the module docs for more details.
 
 =head1 AUTHOR
 
-Tom Insam <tom@jerakeen.org>
+Mario Domgoergen <mdom@cpan.org>
 
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.

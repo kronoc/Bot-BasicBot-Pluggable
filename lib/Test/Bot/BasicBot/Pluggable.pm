@@ -134,7 +134,7 @@ There are no methods to test join, part and emote.
 
 =head1 AUTHOR
 
-Mario Domgoergen <mario@domgoergen.com>
+Mario Domgoergen <mdom@cpan.org>
 
 =head1 LICENSE AND COPYRIGHT
 

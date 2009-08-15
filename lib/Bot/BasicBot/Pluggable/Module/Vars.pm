@@ -33,7 +33,7 @@ Lists the variables and their current values in a module.
 
 =head1 AUTHOR
 
-Tom Insam <tom@jerakeen.org>
+Mario Domgoergen <mdom@cpan.org>
 
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
