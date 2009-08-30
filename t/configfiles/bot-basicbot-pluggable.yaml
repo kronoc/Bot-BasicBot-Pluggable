@@ -5,7 +5,8 @@ nick: botbot
 channel:
   - baz
   - quux
-store: Storable
+store: 
+  type: Storable
 charset: ascii
 module:
   - Loader

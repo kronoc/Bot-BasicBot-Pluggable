@@ -1,3 +1,4 @@
+
 =head1 NAME
 
 Bot::BasicBot::Pluggable::Store - base class for the back-end pluggable store
@@ -39,11 +40,45 @@ internal variables, then C<init>, which you can also override in your module.
 =cut
 
 sub new {
-  my $class = shift;
-  my $self = bless @_ ? { @_ } : {}, $class;
-  $self->init();
-  $self->load();
-  return $self;
+    my $class = shift;
+    my $self = bless @_ ? {@_} : {}, $class;
+    $self->init();
+    $self->load();
+    return $self;
+}
+
+=item new_from_hashref( $hashref )
+
+Intended to be called as class method to dynamically create a store
+object. It expects a hash reference as its only argument. The only
+required hash element is a string specified by I<type>. This should
+be either a fully qualified classname or a colonless string that
+is appended to I<Bot::BasicBot::Pluggable::Store>. All other arguments
+are passed down to the real object constructor.
+
+=cut
+
+sub new_from_hashref {
+    my ( $class, $args ) = @_;
+
+    if ( ref($args) ne 'HASH' ) {
+        croak('Argument to store_from_hashref must be a hashref');
+    }
+
+    my $store_class = delete $args->{type} || 'Memory';
+
+    $store_class = "Bot::BasicBot::Pluggable::Store::$store_class"
+      unless $store_class =~ /::/;
+
+    # load the store class
+    eval "require $store_class";
+    croak "Couldn't load $store_class - $@" if $@;
+
+    my $store = $store_class->new( %{$args} );
+
+    croak "Couldn't init a $store_class store\n" unless $store;
+
+    return $store;
 }
 
 =item init()
@@ -79,39 +114,40 @@ If you pass C<$regex> then it will only pass the keys matching C<$regex>
 =cut
 
 sub keys {
-  my ($self, $namespace, %opts) = @_;
-  my $mod = $self->{store}{$namespace} || {};  
-  return $self->_keys_aux($mod, $namespace, %opts);
+    my ( $self, $namespace, %opts ) = @_;
+    my $mod = $self->{store}{$namespace} || {};
+    return $self->_keys_aux( $mod, $namespace, %opts );
 }
 
 sub count_keys {
-  my ($self, $namespace, %opts) = @_;
-  $opts{_count_only} = 1;
-  $self->keys($namespace, %opts);
+    my ( $self, $namespace, %opts ) = @_;
+    $opts{_count_only} = 1;
+    $self->keys( $namespace, %opts );
 }
 
 sub _keys_aux {
-  my ($self, $mod, $namespace, %opts) = @_;
+    my ( $self, $mod, $namespace, %opts ) = @_;
 
-  my @res = (exists $opts{res}) ? @{$opts{res}} : ();
+    my @res = ( exists $opts{res} ) ? @{ $opts{res} } : ();
 
-  return CORE::keys %$mod unless @res;
+    return CORE::keys %$mod unless @res;
 
-  my @return;
-  my $count = 0;
-  OUTER: while (my ($key) = each %$mod) {
+    my @return;
+    my $count = 0;
+  OUTER: while ( my ($key) = each %$mod ) {
         for my $re (@res) {
-                # limit matches
-                $re = "^".lc($namespace)."_.*${re}.*" if $re =~ m!^[^\^].*[^\$]$!;
-                next OUTER unless $key =~ m!$re!
+
+            # limit matches
+            $re = "^" . lc($namespace) . "_.*${re}.*"
+              if $re =~ m!^[^\^].*[^\$]$!;
+            next OUTER unless $key =~ m!$re!;
         }
-        push @return, $key if (!$opts{_count_only});
-        last if $opts{limit} &&  ++$count >= $opts{limit};
+        push @return, $key if ( !$opts{_count_only} );
+        last if $opts{limit} && ++$count >= $opts{limit};
 
-  }
-  
+    }
 
-  return ($opts{_count_only})? $count : @return;
+    return ( $opts{_count_only} ) ? $count : @return;
 }
 
 =item get($namespace, $variable)
@@ -121,8 +157,8 @@ Returns the stored value of the C<$variable> from C<$namespace>.
 =cut
 
 sub get {
-  my ($self, $namespace, $key) = @_;
-  return $self->{store}{$namespace}{$key};
+    my ( $self, $namespace, $key ) = @_;
+    return $self->{store}{$namespace}{$key};
 }
 
 =item set($namespace, $variable, $value)
@@ -132,10 +168,10 @@ Sets stored value for C<$variable> to C<$value> in C<$namespace>. Returns store 
 =cut
 
 sub set {
-  my ($self, $namespace, $key, $value) = @_;
-  $self->{store}{$namespace}{$key} = $value;
-  $self->save($namespace);
-  return $self;
+    my ( $self, $namespace, $key, $value ) = @_;
+    $self->{store}{$namespace}{$key} = $value;
+    $self->save($namespace);
+    return $self;
 }
 
 =item unset($namespace, $variable)
@@ -145,10 +181,10 @@ Removes the C<$variable> from the store. Returns store object.
 =cut
 
 sub unset {
-  my ($self, $namespace, $key) = @_;
-  delete $self->{store}{$namespace}{$key};
-  $self->save($namespace);
-  return $self;
+    my ( $self, $namespace, $key ) = @_;
+    delete $self->{store}{$namespace}{$key};
+    $self->save($namespace);
+    return $self;
 }
 
 =item namespaces()
@@ -158,8 +194,8 @@ Returns a list of all namespaces in the store.
 =cut
 
 sub namespaces {
-  my $self = shift;
-  return CORE::keys(%{$self->{store}});
+    my $self = shift;
+    return CORE::keys( %{ $self->{store} } );
 }
 
 =item dump()
@@ -176,15 +212,15 @@ C<dump> is written generally so you don't have to re-implement it in subclasses.
 =cut
 
 sub dump {
-  my $self = shift;
-  my $data = {};
-  for my $n ($self->namespaces) {
-    warn "Dumping namespace '$n'.\n";
-    for my $k ($self->keys($n)) {
-      $data->{$n}{$k} = $self->get($n, $k);
+    my $self = shift;
+    my $data = {};
+    for my $n ( $self->namespaces ) {
+        warn "Dumping namespace '$n'.\n";
+        for my $k ( $self->keys($n) ) {
+            $data->{$n}{$k} = $self->get( $n, $k );
+        }
     }
-  }
-  return nfreeze($data);
+    return nfreeze($data);
 }
 
 =item restore($data)
@@ -194,15 +230,15 @@ Restores the store from a L<dump()>.
 =cut
 
 sub restore {
-  my ($self, $dump) = @_;
-  my $data = thaw($dump);
-  for my $n (CORE::keys(%$data)) {
-    warn "Restoring namespace '$n'.\n";
-    for my $k (CORE::keys(%{ $data->{$n} })) {
-      $self->set($n, $k, $data->{$n}{$k});
+    my ( $self, $dump ) = @_;
+    my $data = thaw($dump);
+    for my $n ( CORE::keys(%$data) ) {
+        warn "Restoring namespace '$n'.\n";
+        for my $k ( CORE::keys( %{ $data->{$n} } ) ) {
+            $self->set( $n, $k, $data->{$n}{$k} );
+        }
     }
-  }
-  warn "Complete.\n";
+    warn "Complete.\n";
 }
 
 1;

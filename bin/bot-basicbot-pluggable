@@ -77,9 +77,19 @@ started.
 Defines which storage module is used to save module settings. The
 default is I<Memory>, which does not save any settings between
 sessions but does neither leave any files nor need any special
-settings. As there's no way to define any settings for the storage
-backend, it's not possible to use any backend that needs construction
-paramters. That rules out I<DBI> for example. We'll work on that.
+settings. 
+
+This options take a string in the form I<key>=I<value> and can be
+specified multiple times. The value of the key I<type> define which
+storage backend to load, all other paramters are passed the the
+object constructor as hash reference. 
+
+For example:
+
+  ./bot --store type=Deep --store file=foo.deep
+
+That command will create an L<Bot::BasicBot::Pluggable::Store::Deep>
+object and pass C<file =E<gt> 'foo.deep'> to its constructor.
 
 =item --charset
 
@@ -112,6 +122,9 @@ show than to explain:
  settings:
    Karma:
      self_ignore: 0
+ store:
+   type: Deep
+   file: foo.deep
 
 All modules listed under settings are also loaded on startup.
 

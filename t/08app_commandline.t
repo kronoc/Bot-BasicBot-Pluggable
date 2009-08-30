@@ -9,7 +9,7 @@ our @ARGV = (
       --port 6666
       --nick botbasic
       --charset latin1
-      --store Storable
+      --store type=Storable
       --module Karma
       --channel foo
       --channel bar
@@ -25,7 +25,7 @@ is( $app->server,  'irc',      'setting server via commandline' );
 is( $app->port,    6666,       'setting port via commandline' );
 is( $app->nick,    'botbasic', 'setting basicbot via commandline' );
 is( $app->charset, 'latin1',   'setting charset via commandline' );
-is( $app->store,   'Storable', 'setting store via commandline' );
+isa_ok( $app->store,  'Bot::BasicBot::Pluggable::Store::Storable', 'store via commandline' );
 ok( $app->list_modules, 'setting list_modules via commandline' );
 ok( $app->list_stores,  'setting list_stores via commandline' );
 

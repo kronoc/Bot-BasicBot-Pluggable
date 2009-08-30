@@ -1,5 +1,20 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
+0.81 2009/08/30
+ 
+  - redfined logic of --store option
+
+    Although i added a store option in the last version of the
+    command line bot, it wasn't really helpful as you just could
+    load storage backend without any options. The --store option
+    is now a hashref, with the onyl drawback that you have to
+    specify a storage type even if you just want load a backend
+    without any options.
+
+  - moved store_from_hashref from B::BB::P to B::BB::P::Store and
+    renamed it to new_from_hashref. This could possibly *break*
+    code, but i didn't expect it to.
+
 0.80 2009/08/15
 
   - new command line bot

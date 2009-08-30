@@ -15,7 +15,7 @@ is( $app->server,  'irc.example.com',      'setting server via configfile' );
 is( $app->port,    6668,       'setting port via configfile' );
 is( $app->nick,    'botbot', 'setting basicbot via configfile' );
 is( $app->charset, 'ascii',   'setting charset via configfile' );
-is( $app->store,   'Storable', 'setting store via configfile' );
+isa_ok( $app->store,   'Bot::BasicBot::Pluggable::Store::Storable', 'store via configfile' );
 
 is_deeply(
     $app->module,

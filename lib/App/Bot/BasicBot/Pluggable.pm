@@ -1,6 +1,7 @@
 package App::Bot::BasicBot::Pluggable;
 use Config::Find;
 use Bot::BasicBot::Pluggable;
+use Bot::BasicBot::Pluggable::Store;
 use Moose;
 with 'MooseX::Getopt::Dashes';
 with 'MooseX::SimpleConfig';
@@ -18,6 +19,21 @@ coerce 'App::Bot::BasicBot::Pluggable::Channels'
 	=> from 'ArrayRef'
 	=> via { [ map { /^#/ ? $_ : "#$_" } @{$_} ] };
 
+subtype 'App::Bot::BasicBot::Pluggable::Store'
+	=> as 'Bot::BasicBot::Pluggable::Store';
+
+MooseX::Getopt::OptionTypeMap->add_option_type_to_map(
+    'App::Bot::BasicBot::Pluggable::Store' => '=s%'
+);
+
+coerce 'App::Bot::BasicBot::Pluggable::Store'
+	=> from 'Str'
+	=> via { Bot::BasicBot::Pluggable::Store->new_from_hashref({ type => 'Str' }) };
+
+coerce 'App::Bot::BasicBot::Pluggable::Store'
+	=> from 'HashRef'
+	=> via { Bot::BasicBot::Pluggable::Store->new_from_hashref( shift ) };
+
 has server  => ( is => 'rw', isa => 'Str', default => 'localhost' );
 has nick    => ( is => 'rw', isa => 'Str', default  => 'basicbot' );
 has charset => ( is => 'rw', isa => 'Str', default  => 'utf8' );
@@ -28,7 +44,7 @@ has port     => ( is => 'rw', isa => 'Int', default => 6667 );
 has list_modules => ( is => 'rw', isa => 'Bool', default => 0 );
 has list_stores => ( is => 'rw', isa => 'Bool', default => 0 );
 
-has store    => ( is => 'rw', isa => 'Str', default => 'Memory' );
+has store    => ( is => 'rw', isa => 'App::Bot::BasicBot::Pluggable::Store', coerce => 1,  builder => '_create_store' );
 has settings => ( metaclass => 'NoGetopt', is => 'rw', isa => 'HashRef', default => sub {{}} );
 
 has configfile => (
@@ -79,6 +95,11 @@ sub _load_modules {
             $module->set( 'password_admin', $self->password() );
         }
     }
+}
+
+sub _create_store {
+    return Bot::BasicBot::Pluggable::Store->new_from_hashref(
+        { type => 'Memory' } );
 }
 
 sub _create_bot {

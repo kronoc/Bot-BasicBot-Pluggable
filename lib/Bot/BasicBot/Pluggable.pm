@@ -116,7 +116,7 @@ package Bot::BasicBot::Pluggable;
 use warnings;
 use strict;
 
-our $VERSION = '0.80';
+our $VERSION = '0.81';
 
 use POE;
 use Bot::BasicBot;
@@ -124,60 +124,31 @@ use base qw( Bot::BasicBot );
 
 use Module::Pluggable sub_name => '_available', search_path => 'Bot::BasicBot::Pluggable::Module';
 use Bot::BasicBot::Pluggable::Module;
-use Bot::BasicBot::Pluggable::Store::Storable;
-use Bot::BasicBot::Pluggable::Store::DBI;
+use Bot::BasicBot::Pluggable::Store;
 
 sub init {
-  my $self = shift;
+    my $self = shift;
+    unless ( $self->store ) {
 
-  unless ($self->store) {
-
-    # the default store is a SQLite store
-    $self->store( {
-      type  => "DBI",
-      dsn   => "dbi:SQLite:bot-basicbot.sqlite",
-      table => "basicbot",
-    } );
-  }
-  $self->store_from_hashref($self->store) unless UNIVERSAL::isa($self->store, "Bot::BasicBot::Pluggable::Store");
-  
-  return 1;
-}
-
-
-sub store_from_hashref {
-    my ($self, $store) = @_;
-    # calculate the class we're going to use. If you pass a full
-    # classname as the type, use that class, otherwise assume it's
-    # a B::B::Store:: subclass.
-
-    my $store_class;
-
-    if (ref($store)) {
-    	$store_class = delete $store->{type} || "DBI";
-    } else {
-	$store_class = $store;
+        # the default store is a SQLite store
+        $self->store(
+            {
+                type  => "DBI",
+                dsn   => "dbi:SQLite:bot-basicbot.sqlite",
+                table => "basicbot",
+            }
+        );
     }
-
-    $store_class = "Bot::BasicBot::Pluggable::Store::$store_class"
-      unless $store_class =~ /::/;
-
-    # load the store class
-    eval "require $store_class";
-    die "Couldn't load $store_class - $@" if $@;
-
-    print STDERR "Loading $store_class\n" if $self->{verbose};
-
-    if (ref($store)) {
-    	$self->store( $store_class->new(%{$store}) );
-    } else {
-    	$self->store( $store_class->new() );
+    if ( !UNIVERSAL::isa( $self->store, "Bot::BasicBot::Pluggable::Store" ) ) {
+        my $store = $self->store;
+        if ( !ref($store) ) {
+            $store = { type => $store };
+        }
+        $self->store(
+            Bot::BasicBot::Pluggable::Store->new_from_hashref($store)
+        );
     }
-    
-    die "Couldn't init a $store_class store\n" unless $self->store;
-
-    $self->store;
-
+    return 1;
 }
 
 =head1 METHODS
