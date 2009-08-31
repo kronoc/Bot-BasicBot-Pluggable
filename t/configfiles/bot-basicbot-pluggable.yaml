@@ -6,7 +6,7 @@ channel:
   - baz
   - quux
 store: 
-  type: Storable
+  type: Memory
 charset: ascii
 module:
   - Loader

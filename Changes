@@ -1,5 +1,11 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
+0.82 2009/08/31
+
+  - Failing tests on cpantesters as two tests are creating itermediate files.
+
+    I'm just using the memory backend again.
+
 0.81 2009/08/30
  
   - redfined logic of --store option
