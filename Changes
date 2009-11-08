@@ -1,8 +1,16 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
+0.83 2009/11/08
+
+  - added four missing dispatch events from Bot::Basicbot: nick_change,
+    kicked, topic and userquit. All four can now be handled by modules.
+  - converted some evaled expressions to code blocks
+  - docuemnted a problem with hash signs in yaml configuration files
+
 0.82 2009/08/31
 
-  - Failing tests on cpantesters as two tests are creating itermediate files.
+  - Failing tests on cpantesters as two tests are creating intermediate
+    files.
 
     I'm just using the memory backend again.
 
@@ -13,13 +21,13 @@ Revision history for Perl extension Bot::BasicBot::Pluggable.
     Although i added a store option in the last version of the
     command line bot, it wasn't really helpful as you just could
     load storage backend without any options. The --store option
-    is now a hashref, with the onyl drawback that you have to
+    is now a hashref, with the only drawback that you have to
     specify a storage type even if you just want load a backend
     without any options.
 
   - moved store_from_hashref from B::BB::P to B::BB::P::Store and
     renamed it to new_from_hashref. This could possibly *break*
-    code, but i didn't expect it to.
+    code, but i didn't expect it to. *hrhr*
 
 0.80 2009/08/15
 

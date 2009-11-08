@@ -30,7 +30,7 @@ Bot::BasicBot::Pluggable - extended simple IRC bot for pluggable modules
 
 There's a shell script installed to run the bot.
 
-  $ bot-basicbot-pluggable.pl --nick MyBot --server irc.perl.org
+  $ bot-basicbot-pluggable --nick MyBot --server irc.perl.org
 
 Then connect to the IRC server, /query the bot, and set a password. See
 L<Bot::BasicBot::Pluggable::Module::Auth> for further details.
@@ -116,7 +116,7 @@ package Bot::BasicBot::Pluggable;
 use warnings;
 use strict;
 
-our $VERSION = '0.82';
+our $VERSION = '0.83';
 
 use POE;
 use Bot::BasicBot;
@@ -335,7 +335,7 @@ sub dispatch {
 
   for my $who ($self->handlers) {
     next unless $self->handler($who)->can($method);
-    eval "\$self->handler(\$who)->$method(\@_);";
+    eval { $self->handler($who)->$method(@_) };
     warn $@ if $@;
   }
   return undef;
@@ -359,9 +359,10 @@ sub help {
     return "These modules are available for loading: ".join(", ", $self->available_modules);
   } else {
     if (my $handler = $self->handler($mess->{body})) {
-      my $help;
-      eval "\$help = \$handler->help(\$mess);";
-      return "Error calling help for handler $mess->{body}: $@" if $@;
+      my $help = eval { $handler->help($mess) };
+      if ($@) {
+      	return "Error calling help for handler $mess->{body}: $@";
+      }
       return $help;
     } else {
       return "I don't know anything about '$mess->{body}'.";
@@ -427,8 +428,11 @@ sub emoted {
   for my $priority (0..3) {
     for ($self->handlers) {
       $who = $_;
-      eval "\$response = \$self->handler(\$who)->emoted(\$mess, \$priority); ";
-      $self->reply($mess, "Error calling emoted() for $who: $@") if $@;
+      $response = eval { $self->handler($who)->emoted($mess, $priority) };
+      if ($@) {
+          $self->reply($mess, "Error calling emoted() for $who: $@");
+      }
+
       if ($response and $priority) {
         return if ($response eq "1");
         $self->reply($mess, $response);
@@ -439,18 +443,17 @@ sub emoted {
   return undef;
 }
 
-sub connected {
-  my $self = shift;
-  warn "Bot::BasicBot::Pluggable connected\n";
-  $self->dispatch('connected');
-}
-
-sub chanjoin {
-  shift->dispatch("chanjoin", @_);
-}
-
-sub chanpart {
-  shift->dispatch("chanpart", @_);
+BEGIN {
+	my @dispatchable_events = ( qw/
+		connected chanjoin chanpart userquit nick_change
+		topic kicked
+	/);
+	no strict 'refs';
+	for my $event (@dispatchable_events) {
+		*$event = sub {
+			shift->dispatch($event, @_);
+		};
+	}
 }
 
 =head1 BUGS

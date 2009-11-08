@@ -1,13 +1,10 @@
 ---
 name: Bot-BasicBot-Pluggable
-version: 0.82
+version: 0.83
 author:
   - 'Mario Domgoergen <mdom@cpan.org>'
 abstract: extended simple IRC bot for pluggable modules
 license: perl
-resources:
-  license: ~
-  repository: http://github.com/mdom/bot-basicbot-pluggable
 requires:
   Bot::BasicBot: 0.30
   Config::Find: 0
@@ -25,15 +22,21 @@ requires:
   Text::Unidecode: 0
   URI::Find::Simple: 0
   URI::Title: 0.1
-  perl: 5.8.0
+  perl: v5.8.0
 recommends:
   XML::Feed: 0
+configure_requires:
+  Module::Build: 0.35
+generated_by: Module::Build version 0.35
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
 provides:
   App::Bot::BasicBot::Pluggable:
     file: lib/App/Bot/BasicBot/Pluggable.pm
   Bot::BasicBot::Pluggable:
     file: lib/Bot/BasicBot/Pluggable.pm
-    version: 0.82
+    version: 0.83
   Bot::BasicBot::Pluggable::Module:
     file: lib/Bot/BasicBot/Pluggable/Module.pm
   Bot::BasicBot::Pluggable::Module::Auth:
@@ -74,7 +77,6 @@ provides:
   Test::Bot::BasicBot::Pluggable::Store:
     file: lib/Test/Bot/BasicBot/Pluggable/Store.pm
     version: 0.1
-generated_by: Module::Build version 0.31012
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+resources:
+  license: http://dev.perl.org/licenses/
+  repository: http://github.com/mdom/bot-basicbot-pluggable
