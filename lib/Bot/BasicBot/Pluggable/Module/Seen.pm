@@ -1,44 +1,3 @@
-=head1 NAME
-
-Bot::BasicBot::Pluggable::Module::Seen - track when and where people were seen
-
-=head1 IRC USAGE
-
-=over 4
-
-=item seen <nick>
-
-Find out when the last time a nick was seen and where.
-
-=item hide
-
-Hide yourself from the seen reporting.
-
-=item unhide
-
-Stops hiding yourself from the seen reporting.
-
-=back
-
-=head1 VARS
-
-=over 4
-
-=item allow_hiding
-
-Defaults to 1; whether or not a nick can hide themselves from seen status.
-
-=back
-
-=head1 AUTHOR
-
-Mario Domgoergen <mdom@cpan.org>
-
-This program is free software; you can redistribute it
-and/or modify it under the same terms as Perl itself.
-
-=cut
-
 package Bot::BasicBot::Pluggable::Module::Seen;
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -141,3 +100,44 @@ sub secs_to_string {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Bot::BasicBot::Pluggable::Module::Seen - track when and where people were seen
+
+=head1 IRC USAGE
+
+=over 4
+
+=item seen <nick>
+
+Find out when the last time a nick was seen and where.
+
+=item hide
+
+Hide yourself from the seen reporting.
+
+=item unhide
+
+Stops hiding yourself from the seen reporting.
+
+=back
+
+=head1 VARS
+
+=over 4
+
+=item allow_hiding
+
+Defaults to 1; whether or not a nick can hide themselves from seen status.
+
+=back
+
+=head1 AUTHOR
+
+Mario Domgoergen <mdom@cpan.org>
+
+This program is free software; you can redistribute it
+and/or modify it under the same terms as Perl itself.

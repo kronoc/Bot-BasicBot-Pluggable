@@ -1,86 +1,3 @@
-=head1 NAME
-
-Bot::BasicBot::Pluggable::Module::Infobot - infobot clone redone in B::B::P.
-
-=head1 SYNOPSIS
-
-Does infobot things - basically remembers and returns factoids. Will ask
-another infobot about factoids that it doesn't know about, if you want. Due
-to persistent heckling from the peanut gallery, does things pretty much
-exactly like the classic infobot, even when they're not necessarily that
-useful (for example, saying "Okay." rather than "OK, water is wet."). Further
-infobot backwards compatibility is available through additional packages
-such as L<Bot::BasicBot::Pluggable::Module::Foldoc>.
-
-=head1 IRC USAGE
-
-The following examples assume you're running Infobot with its defaults settings,
-which require the bot to be addressed before learning factoids or answering
-queries. Modify these settings with the Vars below.
-
-  <user> bot: water is wet.
-   <bot> user: okay.
-  <user> bot: water?
-   <bot> user: water is wet.
-  <user> bot: water is also blue.
-   <bot> user: okay.
-  <user> bot: water?
-   <bot> user: water is wet or blue.
-  <user> bot: no, water is translucent.
-   <bot> user: okay.
-  <user> bot: water?
-   <bot> user: water is translucent.
-  <user> bot: forget water.
-   <bot> user: I forgot about water.
-  <user> bot: water?
-   <bot> user: No clue. Sorry.
-
-A fact that begins with "<reply>" will have the "<noun> is" stripped:
-
-  <user> bot: what happen is <reply>somebody set us up the bomb.
-   <bot> user: okay.
-  <user> bot: what happen?
-   <bot> user: somebody set us up the bomb.
-
-A fact that begins "<action>" will be emoted as a response:
-
-  <user> bot: be funny is <action>dances silly.
-   <bot> user: okay.
-  <user> bot: be funny?
-    * bot dances silly.
-
-Pipes ("|") indicate different possible answers, picked at random:
-
-  <user> bot: dice is one|two|three|four|five|six
-   <bot> user: okay.
-  <user> bot: dice?
-   <bot> user: two.
-  <user> bot: dice?
-   <bot> user: four.
-  
-You can also use RSS feeds as a response:
-
-  <user> bot: jerakeen.org is <rss="http://jerakeen.org/rss">.
-   <bot> user: okay.
-  <user> bot: jerakeen.org?
-   <bot> user: jerakeen.org is <item>; <item>; etc....
-
-You can also ask the bot to learn a factoid from another bot, as follows:
-
-  <user> bot: ask bot2 about fact.
-   <bot> user: asking bot2 about fact...
-  <user> bot: fact?
-   <bot> user: fact is very boring.
-
-Finally, you can privmsg the bot to search for particular facts:
-
-  <user> search for options.
-   <bot> I know about 'options indexes', 'charsetoptions override', etc....
-
-=head1 METHODS
-
-=cut
-
 package Bot::BasicBot::Pluggable::Module::Infobot;
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -110,7 +27,6 @@ sub init {
             user_unknown_responses => "Dunno.|I give up.|I have no idea.|No clue. Sorry.|Search me, bub.|Sorry, I don't know.",
             db_version => "1",
     });
-## Please see file perltidy.ERR
 
     # record what we've asked other bots.
     $self->{remote_infobot} = {};
@@ -458,12 +374,11 @@ sub parseFeed {
             splice( @entries, $max_items );
         }
         @items = map { $_->title } @entries;
-    };
-
+    }; 
     if ($@) {
 	chomp $@;
     	return "<< Error parsing RSS from $url: $@ >>";
-    }
+    };
 
     my $ret;
     foreach my $title (@items) {
@@ -500,6 +415,94 @@ sub infobot_reply {
   return 1;
 
 }
+
+1;
+
+
+__END__
+
+=head1 NAME
+
+Bot::BasicBot::Pluggable::Module::Infobot - infobot clone redone in B::B::P.
+
+=head1 SYNOPSIS
+
+Does infobot things - basically remembers and returns factoids. Will ask
+another infobot about factoids that it doesn't know about, if you want. Due
+to persistent heckling from the peanut gallery, does things pretty much
+exactly like the classic infobot, even when they're not necessarily that
+useful (for example, saying "Okay." rather than "OK, water is wet."). Further
+infobot backwards compatibility is available through additional packages
+such as L<Bot::BasicBot::Pluggable::Module::Foldoc>.
+
+=head1 IRC USAGE
+
+The following examples assume you're running Infobot with its defaults settings,
+which require the bot to be addressed before learning factoids or answering
+queries. Modify these settings with the Vars below.
+
+  <user> bot: water is wet.
+   <bot> user: okay.
+  <user> bot: water?
+   <bot> user: water is wet.
+  <user> bot: water is also blue.
+   <bot> user: okay.
+  <user> bot: water?
+   <bot> user: water is wet or blue.
+  <user> bot: no, water is translucent.
+   <bot> user: okay.
+  <user> bot: water?
+   <bot> user: water is translucent.
+  <user> bot: forget water.
+   <bot> user: I forgot about water.
+  <user> bot: water?
+   <bot> user: No clue. Sorry.
+
+A fact that begins with "<reply>" will have the "<noun> is" stripped:
+
+  <user> bot: what happen is <reply>somebody set us up the bomb.
+   <bot> user: okay.
+  <user> bot: what happen?
+   <bot> user: somebody set us up the bomb.
+
+A fact that begins "<action>" will be emoted as a response:
+
+  <user> bot: be funny is <action>dances silly.
+   <bot> user: okay.
+  <user> bot: be funny?
+    * bot dances silly.
+
+Pipes ("|") indicate different possible answers, picked at random:
+
+  <user> bot: dice is one|two|three|four|five|six
+   <bot> user: okay.
+  <user> bot: dice?
+   <bot> user: two.
+  <user> bot: dice?
+   <bot> user: four.
+  
+You can also use RSS feeds as a response:
+
+  <user> bot: jerakeen.org is <rss="http://jerakeen.org/rss">.
+   <bot> user: okay.
+  <user> bot: jerakeen.org?
+   <bot> user: jerakeen.org is <item>; <item>; etc....
+
+You can also ask the bot to learn a factoid from another bot, as follows:
+
+  <user> bot: ask bot2 about fact.
+   <bot> user: asking bot2 about fact...
+  <user> bot: fact?
+   <bot> user: fact is very boring.
+
+Finally, you can privmsg the bot to search for particular facts:
+
+  <user> search for options.
+   <bot> I know about 'options indexes', 'charsetoptions override', etc....
+
+=head1 METHODS
+
+
 
 =head1 VARS
 
@@ -600,7 +603,3 @@ Mario Domgoergen <mdom@cpan.org>
 
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
-
-=cut
-
-1;

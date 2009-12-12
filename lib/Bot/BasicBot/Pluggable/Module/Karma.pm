@@ -1,91 +1,3 @@
-=head1 NAME
-
-Bot::BasicBot::Pluggable::Module::Karma - tracks karma for various concepts
-
-=head1 IRC USAGE
-
-=over 4
-
-=item <thing>++ # <comment>
-
-Increases the karma for <thing>.
-
-=item <thing>-- # <comment>
-
-Decreases the karma for <thing>.
-
-=item karma <thing>
-
-Replies with the karma rating for <thing>.
-
-=item explain <thing>
-
-Lists three each good and bad things said about <thing>:
-
-  <user> explain Morbus
-  <bot> positive: committing lots of bot documentation; fixing the
-        fisher_yates; negative: filling the dev list. overall: 5
-
-=back
-
-=head1 METHODS
-
-=over 4
-
-=item get_karma($username)
-
-Returns either a string representing the total number of karma
-points for the passed C<$username> or the total number of karma
-points and subroutine reference for good and bad karma comments.
-These references return the according karma levels when called in
-scalar context or a array of hash reference. Every hash reference
-has entries for the timestamp (timestamp), the giver (who) and the
-explanation string (reason) for its karma action.
-
-=item add_karma($object, $good, $reason, $who)
-
-Adds or subtracts from the passed C<$object>'s karma. C<$good> is either 1 (to
-add a karma point to the C<$object> or 0 (to subtract). C<$reason> is an 
-optional string commenting on the reason for the change, and C<$who> is the
-person modifying the karma of C<$object>. Nothing is returned.
-
-=back
-
-=head1 VARS
-
-=over 4
-
-=item ignore_selfkarma
-
-Defaults to 1; determines whether to respect selfkarmaing or not.
-
-=item num_comments
-
-Defaults to 3; number of good and bad comments to display on
-explanations. Set this variable to 0 if you do not want to list
-reasons at all.
-
-=item show_givers
-
-Defaults to 1; whether to show who gave good or bad comments on
-explanations.
-
-=item randomize_reasons
-
-Defaults to 1; whether to randomize the order of reasons. If set
-to 0, the reasons are sorted in reversed chronological order.
-
-=back
-
-=head1 AUTHOR
-
-Mario Domgoergen <mdom@cpan.org>
-
-This program is free software; you can redistribute it
-and/or modify it under the same terms as Perl itself.
-
-=cut
-
 package Bot::BasicBot::Pluggable::Module::Karma;
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -268,3 +180,94 @@ sub fisher_yates_shuffle {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Bot::BasicBot::Pluggable::Module::Karma - tracks karma for various concepts
+
+=head1 IRC USAGE
+
+=over 4
+
+=item <thing>++ # <comment>
+
+Increases the karma for <thing>.
+
+=item <thing>-- # <comment>
+
+Decreases the karma for <thing>.
+
+=item karma <thing>
+
+Replies with the karma rating for <thing>.
+
+=item explain <thing>
+
+Lists three each good and bad things said about <thing>:
+
+  <user> explain Morbus
+  <bot> positive: committing lots of bot documentation; fixing the
+        fisher_yates; negative: filling the dev list. overall: 5
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item get_karma($username)
+
+Returns either a string representing the total number of karma
+points for the passed C<$username> or the total number of karma
+points and subroutine reference for good and bad karma comments.
+These references return the according karma levels when called in
+scalar context or a array of hash reference. Every hash reference
+has entries for the timestamp (timestamp), the giver (who) and the
+explanation string (reason) for its karma action.
+
+=item add_karma($object, $good, $reason, $who)
+
+Adds or subtracts from the passed C<$object>'s karma. C<$good> is either 1 (to
+add a karma point to the C<$object> or 0 (to subtract). C<$reason> is an 
+optional string commenting on the reason for the change, and C<$who> is the
+person modifying the karma of C<$object>. Nothing is returned.
+
+=back
+
+=head1 VARS
+
+=over 4
+
+=item ignore_selfkarma
+
+Defaults to 1; determines whether to respect selfkarmaing or not.
+
+=item num_comments
+
+Defaults to 3; number of good and bad comments to display on
+explanations. Set this variable to 0 if you do not want to list
+reasons at all.
+
+=item show_givers
+
+Defaults to 1; whether to show who gave good or bad comments on
+explanations.
+
+=item randomize_reasons
+
+Defaults to 1; whether to randomize the order of reasons. If set
+to 0, the reasons are sorted in reversed chronological order.
+
+=back
+
+=head1 AUTHOR
+
+Mario Domgoergen <mdom@cpan.org>
+
+This program is free software; you can redistribute it
+and/or modify it under the same terms as Perl itself.
+
+
+

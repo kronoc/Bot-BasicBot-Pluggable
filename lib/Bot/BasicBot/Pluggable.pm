@@ -1,3 +1,357 @@
+package Bot::BasicBot::Pluggable;
+use warnings;
+use strict;
+
+our $VERSION = '0.84';
+
+use POE;
+use Bot::BasicBot;
+use Log::Log4perl;
+use Log::Log4perl::Level;
+use base qw( Bot::BasicBot );
+use Data::Dumper;
+
+$Data::Dumper::Terse  = 1;
+$Data::Dumper::Indent = 0;
+
+use Module::Pluggable
+  sub_name    => '_available',
+  search_path => 'Bot::BasicBot::Pluggable::Module',
+  except      => 'Bot::BasicBot::Pluggable::Module::Base';
+use Bot::BasicBot::Pluggable::Module;
+use Bot::BasicBot::Pluggable::Store;
+use File::Spec;
+use Try::Tiny;
+
+sub init {
+    my $self = shift;
+    $self->init_logging();
+
+    my $logger = Log::Log4perl->get_logger( ref $self );
+    $logger->info( 'Starting initialization of ' . ref $self );
+
+    if ( !$self->store ) {
+        $logger->debug('Store not set, trying to load a store backend');
+        my $store;
+        for my $type (qw( DBI Deep Storable Memory )) {
+            $store = try {
+                $logger->debug("Trying to load store backend $type");
+                Bot::BasicBot::Pluggable::Store->new( { type => $type } );
+            };
+            if ($store) {
+                $logger->info("Loaded store backend $type");
+                last;
+            }
+        }
+        if ( !UNIVERSAL::isa( $store, 'Bot::BasicBot::Pluggable::Store' ) ) {
+            $logger->logdie("Couldn't load any default store type");
+        }
+        $self->store($store);
+    }
+    elsif ( !UNIVERSAL::isa( $self->store, "Bot::BasicBot::Pluggable::Store" ) )
+    {
+        $self->store( Bot::BasicBot::Pluggable::Store->new( $self->store ) );
+    }
+    return 1;
+}
+
+sub init_logging {
+    my $self   = shift;
+    my $logger = Log::Log4perl->get_logger( ref $self );
+    if ( $self->logconfig ) {
+        Log::Log4perl->init( $self->logconfig );
+    }
+    else {
+	my $loglevel = $self->loglevel;
+        Log::Log4perl::init( \ <<EOT );
+	log4perl.rootLogger=$loglevel,Screen
+	log4perl.appender.Screen = Log::Log4perl::Appender::Screen
+	log4perl.appender.Screen.stderr = 0
+	log4perl.appender.Screen.layout = Log::Log4perl::Layout::PatternLayout
+	log4perl.appender.Screen.layout.ConversionPattern = %-6p %d %m%n
+EOT
+    }
+}
+
+sub log {
+    my $self   = shift;
+    my $logger = Log::Log4perl->get_logger( ref $self );
+    for my $log_entry (@_) {
+        chomp $log_entry;
+        $logger->warn($log_entry);
+    }
+    return;
+}
+
+sub load {
+    my $self   = shift;
+    my $module = shift;
+
+    my $logger = Log::Log4perl->get_logger( ref $self );
+
+    # it's safe to die here, mostly this call is eval'd.
+    $logger->logdie("Cannot load module with a name") unless $module;
+    $logger->logdie("Module $module already loaded")  if $self->handler($module);
+
+    # This is possible a leeeetle bit evil.
+    $logger->info("Loading module $module");
+    my $file = "Bot/BasicBot/Pluggable/Module/$module.pm";
+    $file = "./$module.pm"         if ( -e "./$module.pm" );
+    $file = "./modules/$module.pm" if ( -e "./modules/$module.pm" );
+    $logger->debug("Loading module $module from file $file");
+
+    # force a reload of the file (in the event that we've already loaded it).
+    no warnings 'redefine';
+    delete $INC{$file};
+
+    try {require $file } catch { die "Can't load $module: $_"; };
+
+    # Ok, it's very evil. Don't bother me, I'm working.
+
+    my $m = "Bot::BasicBot::Pluggable::Module::$module"->new(
+        Bot   => $self,
+        Param => \@_
+    );
+
+    $logger->logdie("->new didn't return an object") unless ( $m and ref($m) );
+    $logger->logdie( ref($m) . " isn't a $module" )
+      unless ref($m) =~ /\Q$module/;
+
+    $self->add_handler( $m, $module );
+
+    return $m;
+}
+
+sub reload {
+    my $self   = shift;
+    my $module = shift;
+    my $logger = Log::Log4perl->get_logger( ref $self );
+    $logger->logdie("Cannot reload module with a name") unless $module;
+    $self->remove_handler($module) if $self->handler($module);
+    return $self->load($module);
+}
+
+sub unload {
+    my $self   = shift;
+    my $module = shift;
+    my $logger = Log::Log4perl->get_logger( ref $self );
+    $logger->logdie("Need name")  unless $module;
+    $logger->logdie("Not loaded") unless $self->handler($module);
+    $logger->info("Unloading module $module");
+    $self->remove_handler($module);
+}
+
+sub module {
+    my $self = shift;
+    return $self->handler(@_);
+}
+
+sub modules {
+    my $self = shift;
+    return $self->handlers(@_);
+}
+
+sub available_modules {
+    my $self = shift;
+    my @local_modules =
+      map { substr( ( File::Spec->splitpath($_) )[2], 0, -3 ) } glob('./*.pm'),
+      glob('./modules/*.pm');
+    my @central_modules =
+      map { s/^Bot::BasicBot::Pluggable::Module:://; $_ } $self->_available;
+    return sort @local_modules, @central_modules;
+}
+
+# deprecated methods
+sub handler {
+    my ( $self, $name ) = @_;
+    return $self->{handlers}{ lc($name) };
+}
+
+sub handlers {
+    my $self = shift;
+    my @keys = keys( %{ $self->{handlers} } );
+    return @keys if wantarray;
+    return \@keys;
+}
+
+sub add_handler {
+    my ( $self, $handler, $name ) = @_;
+    my $logger = Log::Log4perl->get_logger( ref $self );
+    $logger->logdie("Need a name for adding a handler") unless $name;
+    $logger->logdie("Can't load a handler with a duplicate name $name")
+      if $self->{handlers}{ lc($name) };
+    $self->{handlers}{ lc($name) } = $handler;
+}
+
+sub remove_handler {
+    my ( $self, $name ) = @_;
+    my $logger = Log::Log4perl->get_logger( ref $self );
+    $logger->logdie("Need a name for removing a handler") unless $name;
+    $logger->logdie("Hander $name not defined")
+      unless $self->{handlers}{ lc($name) };
+    $self->{handlers}{ lc($name) }->stop();
+    delete $self->{handlers}{ lc($name) };
+}
+
+sub store {
+    my $self = shift;
+    $self->{store_object} = shift if @_;
+    return $self->{store_object};
+}
+
+sub loglevel {
+    my $self = shift;
+    $self->{loglevel} = shift if @_;
+    return uc $self->{loglevel} || 'WARN';
+}
+
+sub logconfig {
+    my $self = shift;
+    $self->{logconfig} = shift if @_;
+    return $self->{logconfig};
+}
+
+sub dispatch {
+    my ( $self, $method, @args ) = @_;
+    my $logger = Log::Log4perl->get_logger( ref $self );
+
+    $logger->info("Dispatching $method");
+    for my $who ( $self->handlers ) {
+        ## Otherwise we would see tick every five seconds
+        if ( $method eq 'tick' ) {
+            $logger->trace("Trying to dispatch $method to $who");
+        }
+        else {
+            $logger->debug("Trying to dispatch $method to $who");
+        }
+        $logger->trace( "... with " . Dumper(@args) )
+          if $logger->is_trace && @args;
+
+        next unless $self->handler($who)->can($method);
+        try {
+            $logger->trace(
+                "Dispatching $method to $who with " . Dumper(@args) )
+              if $logger->is_trace;
+            $self->handler($who)->$method(@args);
+        }
+        catch {
+            $logger->warn($_);
+        }
+    }
+    return undef;
+}
+
+sub help {
+    my $self = shift;
+    my $mess = shift;
+    $mess->{body} =~ s/^help\s*//i;
+    my $logger = Log::Log4perl->get_logger( ref $self );
+
+    unless ( $mess->{body} ) {
+        return
+            "Ask me for help about: "
+          . join( ", ", $self->handlers() )
+          . " (say 'help <modulename>').";
+    }
+    elsif ( $mess->{body} eq 'modules' ) {
+        return "These modules are available for loading: "
+          . join( ", ", $self->available_modules );
+    }
+    else {
+        if ( my $handler = $self->handler( $mess->{body} ) ) {
+            try {
+                return $handler->help($mess);
+            }
+            catch {
+                $logger->warn("Error calling help for handler $mess->{body}: $_" );
+            }
+        }
+        else {
+            return "I don't know anything about '$mess->{body}'.";
+        }
+    }
+}
+
+#########################################################
+# the following routines are lifted from Bot::BasicBot: #
+#########################################################
+sub tick {
+    my $self = shift;
+    $self->dispatch('tick');
+    return 5;
+}
+
+sub dispatch_priorities {
+    my ( $self, $event, $mess ) = @_;
+    my $response;
+    my $who;
+
+    my $logger = Log::Log4perl->get_logger( ref $self );
+    $logger->info('Dispatching said event');
+
+    for my $priority ( 0 .. 3 ) {
+        for my $handler ( $self->handlers ) {
+            my $response;
+            $logger->debug(
+                "Trying to dispatch said to $handler on priority $priority");
+            $logger->trace( '... with arguments ' . Dumper($mess) )
+              if $logger->is_trace and $mess;
+            try {
+                $response =
+                  $self->handler($handler)->$event( $mess, $priority );
+            }
+            catch {
+                $logger->warn($_);
+            };
+            if ( $priority and $response ) {
+                $logger->debug("Response by $handler on $priority");
+                $logger->trace( 'Response is ' . Dumper($response) )
+                  if $logger->is_trace;
+                return if $response eq '1';
+                $self->reply( $mess, $response );
+                return;
+            }
+        }
+    }
+    return undef;
+}
+
+sub reply {
+    my ( $self, $mess, @other ) = @_;
+    $self->dispatch( 'replied', {%$mess}, @other );
+    if ( $mess->{reply_hook} ) {
+        return $mess->{reply_hook}->( $mess, @other );
+    }
+    else {
+        return $self->SUPER::reply( $mess, @other );
+    }
+}
+
+BEGIN {
+    my @dispatchable_events = (
+        qw/
+          connected chanjoin chanpart userquit nick_change
+          topic kicked
+          /
+    );
+    my @priority_events = (qw/ said emoted /);
+    no strict 'refs';
+    for my $event (@dispatchable_events) {
+        *$event = sub {
+            shift->dispatch( $event, @_ );
+        };
+    }
+    for my $event (@priority_events) {
+        *$event = sub {
+            shift->dispatch_priorities( $event, @_ );
+        };
+    }
+}
+
+1;    # sigh.
+
+__END__
+
 =head1 NAME
 
 Bot::BasicBot::Pluggable - extended simple IRC bot for pluggable modules
@@ -110,54 +464,15 @@ module and then interactively load modules via an IRC /query). The modules
 receive events when the bot sees things happen and can, in turn, respond. See
 C<perldoc Bot::BasicBot::Pluggable::Module> for the details of the module API.
 
-=cut
-
-package Bot::BasicBot::Pluggable;
-use warnings;
-use strict;
-
-our $VERSION = '0.83';
-
-use POE;
-use Bot::BasicBot;
-use base qw( Bot::BasicBot );
-
-use Module::Pluggable sub_name => '_available', search_path => 'Bot::BasicBot::Pluggable::Module';
-use Bot::BasicBot::Pluggable::Module;
-use Bot::BasicBot::Pluggable::Store;
-
-sub init {
-    my $self = shift;
-    unless ( $self->store ) {
-
-        # the default store is a SQLite store
-        $self->store(
-            {
-                type  => "DBI",
-                dsn   => "dbi:SQLite:bot-basicbot.sqlite",
-                table => "basicbot",
-            }
-        );
-    }
-    if ( !UNIVERSAL::isa( $self->store, "Bot::BasicBot::Pluggable::Store" ) ) {
-        my $store = $self->store;
-        if ( !ref($store) ) {
-            $store = { type => $store };
-        }
-        $self->store(
-            Bot::BasicBot::Pluggable::Store->new_from_hashref($store)
-        );
-    }
-    return 1;
-}
-
 =head1 METHODS
 
 =over 4
 
 =item new(key => value, ...)
 
-Create a new Bot. Identical to the C<new> method in L<Bot::BasicBot>.
+Create a new Bot. Except of the additional attributes loglevel and
+logconfig identical to the C<new> method in L<Bot::BasicBot>. Please
+refer to their accessor for documentation.
 
 =item load($module)
 
@@ -166,39 +481,6 @@ C<./modules/ModuleName.pm> in that order if one of these files
 exist, and falling back to C<Bot::BasicBot::Pluggable::Module::$module>
 if not.
 
-=cut
-
-sub load {
-  my $self = shift;
-  my $module = shift;
-
-  # it's safe to die here, mostly this call is eval'd.
-  die "Need name" unless $module;
-  die "Already loaded" if $self->handler($module);
-
-  # This is possible a leeeetle bit evil.
-  print STDERR "Loading module '$module' " if $self->{verbose};
-  my $file = "Bot/BasicBot/Pluggable/Module/$module.pm";
-  $file = "./$module.pm" if (-e "./$module.pm");
-  $file = "./modules/$module.pm" if (-e "./modules/$module.pm");
-  print STDERR "from file $file.\n" if $self->{verbose};
-
-  # force a reload of the file (in the event that we've already loaded it).
-  no warnings 'redefine';
-  delete $INC{$file};
-  require $file;
-  # Ok, it's very evil. Don't bother me, I'm working.
-
-  my $m = "Bot::BasicBot::Pluggable::Module::$module"->new(Bot=>$self, Param=>\@_);
-
-  die "->new didn't return an object" unless ($m and ref($m));
-  die ref($m)." isn't a $module" unless ref($m) =~ /\Q$module/;
-
-  $self->add_handler($m, $module);
-
-  return $m;
-}
-
 =item reload($module)
 
 Reload the module C<$module> - equivalent to unloading it (if it's already
@@ -206,78 +488,22 @@ loaded) and reloading it. Will stomp the old module's namespace - warnings
 are expected here. Not toally clean - if you're experiencing odd bugs, restart
 the bot if possible. Works for minor bug fixes, etc.
 
-=cut
-
-sub reload {
-  my $self = shift;
-  my $module = shift;
-  return "Need name" unless $module;
-  $self->remove_handler($module) if $self->handler($module);
-  return $self->load($module);
-}
-
 =item unload($module)
 
 Removes a module from the bot. It won't get events any more.
-
-=cut
-
-sub unload {
-  my $self = shift;
-  my $module = shift;
-  return "Need name" unless $module;
-  return "Not loaded" unless $self->handler($module);
-  warn "Unloading module '$module' ";
-  $self->remove_handler($module);
-}
 
 =item module($module)
 
 Returns the handler object for the loaded module C<$module>. Used, e.g.,
 to get the 'Auth' hander to check if a given user is authenticated.
 
-=cut
-
-sub module {
-  my $self = shift;
-  return $self->handler(@_);
-}
-
 =item modules
 
 Returns a list of the names of all loaded modules as an array.
 
-=cut
-
-sub modules {
-  my $self = shift;
-  return $self->handlers(@_);
-}
-
 =item available_modules
 
 Returns a list of all available modules whether loaded or not
-
-=cut
-
-sub available_modules {
-  my $self = shift;
-  return sort map { s/^Bot::BasicBot::Pluggable::Module:://; $_ } $self->_available;
-}
-
-
-# deprecated methods
-sub handler {
-  my ($self, $name) = @_;
-  return $self->{handlers}{lc($name)};
-}
-
-sub handlers {
-  my $self = shift;
-  my @keys = keys(%{$self->{handlers}});
-  return @keys if wantarray;
-  return \@keys;
-}
 
 =item add_handler($handler_object, $handler_name)
 
@@ -285,176 +511,47 @@ Adds a handler object with the given name to the queue of modules. There
 is no order specified internally, so adding a module earlier does not
 guarantee it'll get called first. Names must be unique.
 
-=cut
-
-sub add_handler {
-  my ($self, $handler, $name) = @_;
-  die "Need a name for adding a handler" unless $name;
-  die "Can't load a handler with a duplicate name $name" if $self->{handlers}{lc($name)};
-  $self->{handlers}{lc($name)} = $handler;
-}
-
 =item remove_handler($handler_name)
 
 Remove a handler with the given name.
-
-=cut
-
-sub remove_handler {
-  my ($self, $name) = @_;
-  die "Need a name for removing a handler" unless $name;
-  die "Hander $name not defined" unless $self->{handlers}{lc($name)};
-  $self->{handlers}{lc($name)}->stop();
-  delete $self->{handlers}{lc($name)};
-}
 
 =item store
 
 Returns the bot's object store; see L<Bot::BasicBot::Pluggable::Store>.
 
-=cut
+=item log
 
-sub store {
-  my $self = shift;
-  if (@_) {
-    $self->{store_object} = shift;
-    return $self;
-  }
-  return $self->{store_object};
-}
+Logs all of its argument to loglevel info. Please do not use this
+function in new code, it's simple provided as fallback for old
+modules.
+
+=item loglevel
+
+Returns the bots loglevel or sets it if an argument is supplied.
+It expects trace, debug, info, warn, error or fatal as value.
+
+=item logconfig
+
+Returns the bot configuration file for logging. Please refer to
+L<Log::Log4perl::Config> for the configurations files format. Setting
+this to a differant file after calling init() has no effect.
+
+Returns or set 
 
 =item dispatch($method_name, $method_params)
 
 Call the named C<$method> on every loaded module with that method name.
-
-=cut
-
-sub dispatch {
-  my $self = shift;
-  my $method = shift;
-
-  for my $who ($self->handlers) {
-    next unless $self->handler($who)->can($method);
-    eval { $self->handler($who)->$method(@_) };
-    warn $@ if $@;
-  }
-  return undef;
-}
 
 =item help
 
 Returns help for the ModuleName of message 'help ModuleName'. If no message
 has been passed, return a list of all possible handlers to return help for.
 
-=cut
-
-sub help {
-  my $self = shift;
-  my $mess = shift;
-  $mess->{body} =~ s/^help\s*//i;
-  
-  unless ($mess->{body}) {
-    return "Ask me for help about: " . join(", ", $self->handlers())." (say 'help <modulename>').";
-  } elsif ($mess->{body} eq 'modules') { 
-    return "These modules are available for loading: ".join(", ", $self->available_modules);
-  } else {
-    if (my $handler = $self->handler($mess->{body})) {
-      my $help = eval { $handler->help($mess) };
-      if ($@) {
-      	return "Error calling help for handler $mess->{body}: $@";
-      }
-      return $help;
-    } else {
-      return "I don't know anything about '$mess->{body}'.";
-    }
-  }
-}
-
 =item run
 
 Runs the bot. POE core gets control at this point; you're unlikely to get it back.
 
 =back
-
-=cut
-
-#########################################################
-# the following routines are lifted from Bot::BasicBot: #
-#########################################################
-sub tick {
-  my $self = shift;
-  $self->dispatch('tick');
-  return 5;
-}
-
-sub said {
-  my $self = shift;
-  my ($mess) = @_;
-  my $response;
-  my $who;
-  
-  for my $priority (0..3) {
-    for ($self->handlers) {
-      $who = $_;
-      $response = eval { $self->handler($who)->said( $mess, $priority ) };
-      warn $@ if $@;
-      $self->reply($mess, "Error calling said() for $who: $@") if $@;
-      if ($response and $priority) {
-        return if ($response eq "1");
-        $self->reply($mess, $response);
-        return;
-      }
-    }
-  }
-  return undef;
-}
-
-sub reply {
-  my ($self, $mess, @other) = @_;
-  $self->dispatch('replied',{ %$mess }, @other);
-  if ($mess->{reply_hook}) {
-    return $mess->{reply_hook}->($mess, @other);
-  } else {
-    return $self->SUPER::reply($mess, @other);
-  }
-}
-
-sub emoted {
-  my $self = shift;
-  my $mess = shift;
-  my $response;
-  my $who;
-  
-  for my $priority (0..3) {
-    for ($self->handlers) {
-      $who = $_;
-      $response = eval { $self->handler($who)->emoted($mess, $priority) };
-      if ($@) {
-          $self->reply($mess, "Error calling emoted() for $who: $@");
-      }
-
-      if ($response and $priority) {
-        return if ($response eq "1");
-        $self->reply($mess, $response);
-        return;
-      }
-    }
-  }
-  return undef;
-}
-
-BEGIN {
-	my @dispatchable_events = ( qw/
-		connected chanjoin chanpart userquit nick_change
-		topic kicked
-	/);
-	no strict 'refs';
-	for my $event (@dispatchable_events) {
-		*$event = sub {
-			shift->dispatch($event, @_);
-		};
-	}
-}
 
 =head1 BUGS
 
@@ -481,7 +578,7 @@ and/or modify it under the same terms as Perl itself.
 =head1 CREDITS
 
 Bot::BasicBot was written initially by Mark Fowler, and worked on heavily by
-Simon Kent, who was kind enough to apply some patches I needed for Pluggable.
+Simon Kent, who was kind enough to apply some patches we needed for Pluggable.
 Eventually. Oh, yeah, and I stole huge chunks of docs from the Bot::BasicBot
 source too. I spent a lot of time in the mozbot code, and that has influenced
 my ideas for Pluggable. Mostly to get round its awfulness.
@@ -507,7 +604,5 @@ Infobot: http://www.infobot.org/
 
 Mozbot: http://www.mozilla.org/projects/mozbot/
 
-=cut
 
-1; # sigh.
 

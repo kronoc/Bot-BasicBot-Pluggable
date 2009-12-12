@@ -1,40 +1,3 @@
-=head1 NAME
-
-Bot::BasicBot::Pluggable::Module::Title - speaks the title of URLs mentioned
-
-=head1 IRC USAGE
-
-None. If the module is loaded, the bot will speak the titles of all URLs mentioned.
-
-=head1 VARS
-
-=over 4
-
-=item asciify
-
-Defaults to 1; whether or not we should convert all titles to ascii from Unicode
-
-=item ignore_re
-
-If set to a nonempty string, ignore URLs matching this re
-
-=back
-
-=head1 REQUIREMENTS
-
-L<URI::Title>
-
-L<URI::Find::Simple>
-
-=head1 AUTHOR
-
-Mario Domgoergen <mdom@cpan.org>
-
-This program is free software; you can redistribute it
-and/or modify it under the same terms as Perl itself.
-
-=cut
-
 package Bot::BasicBot::Pluggable::Module::Title;
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -89,4 +52,43 @@ sub admin {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Bot::BasicBot::Pluggable::Module::Title - speaks the title of URLs mentioned
+
+=head1 IRC USAGE
+
+None. If the module is loaded, the bot will speak the titles of all URLs mentioned.
+
+=head1 VARS
+
+=over 4
+
+=item asciify
+
+Defaults to 1; whether or not we should convert all titles to ascii from Unicode
+
+=item ignore_re
+
+If set to a nonempty string, ignore URLs matching this re
+
+=back
+
+=head1 REQUIREMENTS
+
+L<URI::Title>
+
+L<URI::Find::Simple>
+
+=head1 AUTHOR
+
+Mario Domgoergen <mdom@cpan.org>
+
+This program is free software; you can redistribute it
+and/or modify it under the same terms as Perl itself.
+
+
 

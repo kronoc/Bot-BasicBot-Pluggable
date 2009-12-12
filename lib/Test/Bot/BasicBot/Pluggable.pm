@@ -26,11 +26,11 @@ sub tell_indirect {
 }    # the module has seen something
 
 sub tell {
-    my ( $bot, $body, $private, $addressed ) = @_;
+    my ( $bot, $body, $private, $addressed, $who ) = @_;
     my @reply;
     my $message = {
         body       => $body,
-        who        => 'test_user',
+        who        => $who || 'test_user',
         channel    => $private ? 'msg' : '#test',
         address    => $addressed,
         reply_hook => sub { push @reply, $_[1]; },    # $_[1] is the reply text

@@ -1,27 +1,3 @@
-
-=head1 NAME
-
-Bot::BasicBot::Pluggable::Store - base class for the back-end pluggable store
-
-=head1 SYNOPSIS
-
-  my $store = Bot::BasicBot::Pluggable::Store->new( option => "value" );
-
-  my $namespace = "MyModule";
-
-  for ( $store->keys($namespace) ) {
-    my $value = $store->get($namespace, $_);
-    $store->set( $namespace, $_, "$value and your momma." );
-  }
-
-Store classes should subclass this and provide some persistent way of storing things.
-
-=head1 METHODS
-
-=over 4
-
-=cut
-
 package Bot::BasicBot::Pluggable::Store;
 use warnings;
 use strict;
@@ -31,32 +7,28 @@ use Storable qw( nfreeze thaw );
 
 use base qw( );
 
-=item new()
-
-Standard C<new> method, blesses a hash into the right class and puts any
-key/value pairs passed to it into the blessed hash. Calls C<load()> to load any
-internal variables, then C<init>, which you can also override in your module.
-
-=cut
-
 sub new {
     my $class = shift;
-    my $self = bless @_ ? {@_} : {}, $class;
+    my $self;
+    if ( @_ % 2 == 0 ) {
+        $self = bless { @_ } => $class;
+    }
+    elsif ( @_ == 1 and ref $_[0] eq 'HASH' ) {
+        $self = $class->new_from_hashref($_[0] );
+    }
+    elsif ( @_ == 1 and ! ref $_[0]) {
+        $self = $class->new_from_hashref({ type => $_[0] });
+    }
+    elsif ( !@_ ) {
+        $self = bless {} => $class;
+    }
+    else {
+        croak "Argument to new() is neither an argument list, a hashref, a string nor empty";
+    }
     $self->init();
     $self->load();
     return $self;
 }
-
-=item new_from_hashref( $hashref )
-
-Intended to be called as class method to dynamically create a store
-object. It expects a hash reference as its only argument. The only
-required hash element is a string specified by I<type>. This should
-be either a fully qualified classname or a colonless string that
-is appended to I<Bot::BasicBot::Pluggable::Store>. All other arguments
-are passed down to the real object constructor.
-
-=cut
 
 sub new_from_hashref {
     my ( $class, $args ) = @_;
@@ -81,37 +53,11 @@ sub new_from_hashref {
     return $store;
 }
 
-=item init()
-
-Called as part of new class construction, before C<load()>.
-
-=cut
-
 sub init { undef }
-
-=item load()
-
-Called as part of new class construction, after C<init()>.
-
-=cut
 
 sub load { undef }
 
-=item save()
-
-Subclass me. But, only if you want to. See ...Store::Storable.pm as an example.
-
-=cut
-
 sub save { }
-
-=item keys($namespace,[$regex])
-
-Returns a list of all store keys for the passed C<$namespace>.
-
-If you pass C<$regex> then it will only pass the keys matching C<$regex>
-
-=cut
 
 sub keys {
     my ( $self, $namespace, %opts ) = @_;
@@ -150,22 +96,10 @@ sub _keys_aux {
     return ( $opts{_count_only} ) ? $count : @return;
 }
 
-=item get($namespace, $variable)
-
-Returns the stored value of the C<$variable> from C<$namespace>.
-
-=cut
-
 sub get {
     my ( $self, $namespace, $key ) = @_;
     return $self->{store}{$namespace}{$key};
 }
-
-=item set($namespace, $variable, $value)
-
-Sets stored value for C<$variable> to C<$value> in C<$namespace>. Returns store object.
-
-=cut
 
 sub set {
     my ( $self, $namespace, $key, $value ) = @_;
@@ -174,12 +108,6 @@ sub set {
     return $self;
 }
 
-=item unset($namespace, $variable)
-
-Removes the C<$variable> from the store. Returns store object.
-
-=cut
-
 sub unset {
     my ( $self, $namespace, $key ) = @_;
     delete $self->{store}{$namespace}{$key};
@@ -187,29 +115,10 @@ sub unset {
     return $self;
 }
 
-=item namespaces()
-
-Returns a list of all namespaces in the store.
-
-=cut
-
 sub namespaces {
     my $self = shift;
     return CORE::keys( %{ $self->{store} } );
 }
-
-=item dump()
-
-Dumps the complete store to a huge Storable scalar. This is mostly so
-you can convert from one store to another easily, i.e.:
-
-  my $from = Bot::BasicBot::Pluggable::Store::Storable->new();
-  my $to   = Bot::BasicBot::Pluggable::Store::DBI->new( ... );
-  $to->restore( $from->dump );
-
-C<dump> is written generally so you don't have to re-implement it in subclasses.
-
-=cut
 
 sub dump {
     my $self = shift;
@@ -222,12 +131,6 @@ sub dump {
     }
     return nfreeze($data);
 }
-
-=item restore($data)
-
-Restores the store from a L<dump()>.
-
-=cut
 
 sub restore {
     my ( $self, $dump ) = @_;
@@ -243,6 +146,124 @@ sub restore {
 
 1;
 
+__END__
+
+=head1 NAME
+
+Bot::BasicBot::Pluggable::Store - base class for the back-end pluggable store
+
+=head1 SYNOPSIS
+
+  my $store = Bot::BasicBot::Pluggable::Store->new( option => "value" );
+
+  my $namespace = "MyModule";
+
+  for ( $store->keys($namespace) ) {
+    my $value = $store->get($namespace, $_);
+    $store->set( $namespace, $_, "$value and your momma." );
+  }
+
+Store classes should subclass this and provide some persistent way of storing things.
+
+=head1 METHODS
+
+=over 4
+
+
+
+=item new()
+
+Standard C<new> method, blesses a hash into the right class and
+puts any key/value pairs passed to it into the blessed hash. If
+called with an hash argument as its first argument, new_from_hashref
+will be run with the hash as its only argument. See L</new_from_hashref>
+for the possible keys and values. You can also pass a string and
+it will try to call new_from_hashref with a hash reference { type
+=> $string }. Calls C<load()> to load any internal variables, then
+C<init>, which you can also override in your module.
+
+
+
+=item new_from_hashref( $hashref )
+
+Intended to be called as class method to dynamically create a store
+object. It expects a hash reference as its only argument. The only
+required hash element is a string specified by I<type>. This should
+be either a fully qualified classname or a colonless string that
+is appended to I<Bot::BasicBot::Pluggable::Store>. All other arguments
+are passed down to the real object constructor.
+
+
+
+=item init()
+
+Called as part of new class construction, before C<load()>.
+
+
+
+=item load()
+
+Called as part of new class construction, after C<init()>.
+
+
+
+=item save()
+
+Subclass me. But, only if you want to. See ...Store::Storable.pm as an example.
+
+
+
+=item keys($namespace,[$regex])
+
+Returns a list of all store keys for the passed C<$namespace>.
+
+If you pass C<$regex> then it will only pass the keys matching C<$regex>
+
+
+
+=item get($namespace, $variable)
+
+Returns the stored value of the C<$variable> from C<$namespace>.
+
+
+
+=item set($namespace, $variable, $value)
+
+Sets stored value for C<$variable> to C<$value> in C<$namespace>. Returns store object.
+
+
+
+=item unset($namespace, $variable)
+
+Removes the C<$variable> from the store. Returns store object.
+
+
+
+=item namespaces()
+
+Returns a list of all namespaces in the store.
+
+
+
+=item dump()
+
+Dumps the complete store to a huge Storable scalar. This is mostly so
+you can convert from one store to another easily, i.e.:
+
+  my $from = Bot::BasicBot::Pluggable::Store::Storable->new();
+  my $to   = Bot::BasicBot::Pluggable::Store::DBI->new( ... );
+  $to->restore( $from->dump );
+
+C<dump> is written generally so you don't have to re-implement it in subclasses.
+
+
+
+=item restore($data)
+
+Restores the store from a L<dump()>.
+
+
+
 =back
 
 =head1 AUTHOR
@@ -252,7 +273,7 @@ Mario Domgoergen <mdom@cpan.org>
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
 
-=cut
+
 
 =head1 SEE ALSO
 
@@ -260,6 +281,5 @@ L<Bot::BasicBot::Pluggable>
 
 L<Bot::BasicBot::Pluggable::Module>
 
-=cut
 
-1;
+

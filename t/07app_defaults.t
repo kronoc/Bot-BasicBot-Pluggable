@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 10;
+use Test::More tests => 11;
 use App::Bot::BasicBot::Pluggable;
 
 ## Testing defaults
@@ -16,6 +16,7 @@ is($app->server,'localhost','checking default for server');
 is($app->port,6667,'checking default for port');
 is($app->nick,'basicbot','checking default for basicbot');
 is($app->charset,'utf8','checking default for charset');
+is($app->loglevel,'warn','checking default for loglevel');
 ok(!$app->list_modules,'checking default for list_modules');
 ok(!$app->list_stores,'checking default for list_stores');
 is_deeply($app->settings,{},'checking default for settings');

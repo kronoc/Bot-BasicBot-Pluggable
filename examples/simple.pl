@@ -8,11 +8,11 @@ use warnings;
 use strict;
 use Bot::BasicBot::Pluggable;
 
-my $bot = Bot::BasicBot::Pluggable->new( channels => [ ],
-                                         server => "london.irc.perl.org",
-                                         nick => "jerabot",
-                                         );
-                                         
+my $bot = Bot::BasicBot::Pluggable->new(
+    channels => [],
+    server   => "london.irc.perl.org",
+    nick     => "jerabot",
+);
 
 $bot->load("Seen");
 

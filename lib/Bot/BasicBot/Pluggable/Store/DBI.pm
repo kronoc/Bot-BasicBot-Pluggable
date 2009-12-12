@@ -1,35 +1,3 @@
-=head1 NAME
-
-Bot::BasicBot::Pluggable::Store::DBI - use DBI to provide a storage backend
-
-=head1 SYNOPSIS
-
-  my $store = Bot::BasicBot::Pluggable::Store::DBI->new(
-    dsn          => "dbi:mysql:bot",
-    user         => "user",
-    password     => "password",
-    table        => "brane",
-
-    # create indexes on key/values?
-    create_index => 1,
-  );
-
-  $store->set( "namespace", "key", "value" );
-  
-=head1 DESCRIPTION
-
-This is a L<Bot::BasicBot::Pluggable::Store> that uses a database to store
-the values set by modules. Complex values are stored using Storable.
-
-=head1 AUTHOR
-
-Mario Domgoergen <mdom@cpan.org>
-
-This program is free software; you can redistribute it
-and/or modify it under the same terms as Perl itself.
-
-=cut
-
 package Bot::BasicBot::Pluggable::Store::DBI;
 use warnings;
 use strict;
@@ -37,11 +5,14 @@ use Carp qw( croak );
 use Data::Dumper;
 use DBI;
 use Storable qw( nfreeze thaw );
+use Try::Tiny;
 
 use base qw( Bot::BasicBot::Pluggable::Store );
 
 sub init {
   my $self = shift;
+  $self->{dsn}   ||= 'dbi:SQLite:bot-basicbot.sqlite';
+  $self->{table} ||= 'basicbot';
   $self->create_table;
 }
 
@@ -66,7 +37,7 @@ sub create_table {
 			    store_value LONGBLOB )"
         );
         if ( $self->{create_index} ) {
-            eval {
+            try {
                 $self->dbh->do( "CREATE INDEX lookup ON $table ( namespace(10), store_key(10) )");
             };
         }
@@ -82,7 +53,7 @@ sub get {
   my $row = $sth->fetchrow_arrayref;
   $sth->finish; return undef unless $row and @$row;
   local $@;
-  return eval { thaw($row->[0]) } || $row->[0];
+  return try { thaw($row->[0]) } catch { $row->[0] };
 }
 
 sub set {
@@ -165,4 +136,38 @@ sub namespaces {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Bot::BasicBot::Pluggable::Store::DBI - use DBI to provide a storage backend
+
+=head1 SYNOPSIS
+
+  my $store = Bot::BasicBot::Pluggable::Store::DBI->new(
+    dsn          => "dbi:mysql:bot",
+    user         => "user",
+    password     => "password",
+    table        => "brane",
+
+    # create indexes on key/values?
+    create_index => 1,
+  );
+
+  $store->set( "namespace", "key", "value" );
+  
+=head1 DESCRIPTION
+
+This is a L<Bot::BasicBot::Pluggable::Store> that uses a database to store
+the values set by modules. Complex values are stored using Storable.
+
+=head1 AUTHOR
+
+Mario Domgoergen <mdom@cpan.org>
+
+This program is free software; you can redistribute it
+and/or modify it under the same terms as Perl itself.
+
+
 

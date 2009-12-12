@@ -1,14 +1,19 @@
 package App::Bot::BasicBot::Pluggable;
+use Moose;
 use Config::Find;
 use Bot::BasicBot::Pluggable;
 use Bot::BasicBot::Pluggable::Store;
-use Moose;
-with 'MooseX::Getopt::Dashes';
-with 'MooseX::SimpleConfig';
 use Moose::Util::TypeConstraints;
 use List::MoreUtils qw(any uniq);
+use Try::Tiny;
+use Log::Log4perl;
 
-use Module::Pluggable sub_name => '_available_stores', search_path => 'Bot::BasicBot::Pluggable::Store';
+with 'MooseX::Getopt::Dashes';
+with 'MooseX::SimpleConfig';
+
+use Module::Pluggable
+  sub_name    => '_available_stores',
+  search_path => 'Bot::BasicBot::Pluggable::Store';
 
 subtype 'App::Bot::BasicBot::Pluggable::Channels'
 	=> as 'ArrayRef'
@@ -34,18 +39,22 @@ coerce 'App::Bot::BasicBot::Pluggable::Store'
 	=> from 'HashRef'
 	=> via { Bot::BasicBot::Pluggable::Store->new_from_hashref( shift ) };
 
-has server  => ( is => 'rw', isa => 'Str', default => 'localhost' );
-has nick    => ( is => 'rw', isa => 'Str', default  => 'basicbot' );
-has charset => ( is => 'rw', isa => 'Str', default  => 'utf8' );
-has channel => ( is => 'rw', isa => 'App::Bot::BasicBot::Pluggable::Channels', coerce => 1, default => sub { []  });
-has password => ( is => 'rw', isa => 'Str' );
-has port     => ( is => 'rw', isa => 'Int', default => 6667 );
+has server    => ( is => 'rw', isa => 'Str', default => 'localhost' );
+has nick      => ( is => 'rw', isa => 'Str', default  => 'basicbot' );
+has charset   => ( is => 'rw', isa => 'Str', default  => 'utf8' );
+has channel   => ( is => 'rw', isa => 'App::Bot::BasicBot::Pluggable::Channels', coerce => 1, default => sub { []  });
+has password  => ( is => 'rw', isa => 'Str' );
+has port      => ( is => 'rw', isa => 'Int', default => 6667 );
+has bot_class => ( is => 'rw', isa => 'Str', default => 'Bot::BasicBot::Pluggable' );
 
 has list_modules => ( is => 'rw', isa => 'Bool', default => 0 );
-has list_stores => ( is => 'rw', isa => 'Bool', default => 0 );
+has list_stores  => ( is => 'rw', isa => 'Bool', default => 0 );
 
 has store    => ( is => 'rw', isa => 'App::Bot::BasicBot::Pluggable::Store', coerce => 1,  builder => '_create_store' );
 has settings => ( metaclass => 'NoGetopt', is => 'rw', isa => 'HashRef', default => sub {{}} );
+
+has loglevel  => ( is => 'rw', isa => 'Str', default => 'warn');
+has logconfig => ( is => 'rw', isa => 'Str' );
 
 has configfile => (
     is      => 'rw',
@@ -79,13 +88,19 @@ sub BUILD {
 sub _load_modules {
     my ($self) = @_;
     my %settings = %{ $self->settings() };
+    my $logger = Log::Log4perl->get_logger(ref $self);
 
     # Implicit loading of modules via $self->settings
     my @modules = uniq @{ $self->module() }, keys %settings;
     $self->module([@modules]);
 
     for my $module_name ( @modules ) {
-        my $module = $self->bot->load($module_name);
+        my $module = try {
+		 $self->bot->load($module_name);
+	} catch { 
+		$logger->error("$_");
+	};
+	next if !$module;
         if ( exists( $settings{$module_name} ) ) {
             for my $key ( keys %{ $settings{$module_name} } ) {
                 $module->set( $key, $settings{$module_name}->{$key} );
@@ -104,13 +119,16 @@ sub _create_store {
 
 sub _create_bot {
     my ($self) = @_;
-    return Bot::BasicBot::Pluggable->new(
+    my $class = $self->bot_class();
+    return $class->new(
         channels => $self->channel(),
         server   => $self->server(),
         nick     => $self->nick(),
         charset  => $self->charset(),
         port     => $self->port(),
         store    => $self->store(),
+	loglevel => $self->loglevel(),
+	logconfig => $self->logconfig(),
     );
 }
 
@@ -133,3 +151,5 @@ sub run {
 }
 
 1;
+
+__END__

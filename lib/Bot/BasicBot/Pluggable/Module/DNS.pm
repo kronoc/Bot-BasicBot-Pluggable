@@ -1,30 +1,3 @@
-=head1 NAME
-
-Bot::BasicBot::Pluggable::Module::DNS - DNS lookups for hostnames or IP addresses
-
-=head1 IRC USAGE
-
-=over 4
-
-=item dns <ip address>
-
-Returns the hostname of that IP address
-
-=item nslookup <hostname>
-
-Returns the IP address of the hostname.
-
-=back
-
-=head1 AUTHOR
-
-Mario Domgoergen <mdom@cpan.org>
-
-This program is free software; you can redistribute it
-and/or modify it under the same terms as Perl itself.
-
-=cut
-
 package Bot::BasicBot::Pluggable::Module::DNS;
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -55,3 +28,33 @@ sub told {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Bot::BasicBot::Pluggable::Module::DNS - DNS lookups for hostnames or IP addresses
+
+=head1 IRC USAGE
+
+=over 4
+
+=item dns <ip address>
+
+Returns the hostname of that IP address
+
+=item nslookup <hostname>
+
+Returns the IP address of the hostname.
+
+=back
+
+=head1 AUTHOR
+
+Mario Domgoergen <mdom@cpan.org>
+
+This program is free software; you can redistribute it
+and/or modify it under the same terms as Perl itself.
+
+
+

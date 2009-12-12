@@ -1,11 +1,75 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
+0.84 2009/12/11
+
+  - Log4Perl: Instead of just printing error messages to stdout,
+    the bot now uses Log4perl to emit warnings and debugging information.
+    For now i just added this new capability to Bot::BasicBot::Pluggable
+    but this will be expanded to all the modules in one of the next
+    releases.
+
+    The bot's old log() function will now emit a message with
+    priority warning to mimic the old behaviour.
+
+    The command line bots now have two new options: --loglevel and
+    --logconfig.
+
+  - Commandline Bot: A simple command line bot was part of the
+    github repository for quite some time now, but it was never
+    shipped with a release before. To close #46875 and as it's a
+    really neat way to test some modules, i'll reworked
+    bot-basicbot-pluggable-cli, added
+    App::Bot::BasicBot::Pluggable::Console and
+    Bot::BasicBot::Pluggable::Console and use
+    Test::Bot::BasicBot::Pluggable as its basis. You can call it
+    with the same arguments as its irc cousin, but some options
+    like --server or even --channel does not (yet?) make any sense
+    in this context.
+
+  - Auth: Added allow_anonymous as requested and implemented by
+    Toni Spets. Setting this value to true, does basically disable
+    authentication for all modules, that are not explicitly checking
+    for the users authentication level. 
+
+    You only ever want to set this value to true, if you want to
+    develop modules that need to prefix commands with ! for
+    unauthenticated users. You've been warned.
+
+  - Loader, Vars: As direct consequence Loader.pm and Vars.pm do
+    now check explicitly.
+
+  - Loader: !list does now also return all available but not loaded
+    modules (thanks to Manuel Hachtkemper for the hint). I can see
+    that the old behaviour might be a little bit confusing for some
+    users.
+
+  - available_modules() returns really all available modules ...
+    till this release the bot just returned modules in PERL5LIB and
+    ignored modules in ./modules and ./
+
+  - Store: DBI, DBM::Deep and DBD::SQLite are no langer hard
+    requirements of this module. Bot::BasicBot::Pluggable now tries
+    to load all storage types in a predefined order until one returns
+    successfully. Normally you should just select one explicitly.
+
+  - Base.pm: Removed Base.pm from the list of available modules und
+    depracate its usage
+
+  - Try::Tiny: Error handling is now performed by try::tiny instead
+    of writing all the eval boilerplate. Although it does lack some
+    convenience, i selected it as we'll get it through moose in any
+    case.
+
+  - ChanOp.pm: New core module to handle channel managment operations
+    like oping, deoping, kicking and flood control. Please take a
+    closer look at this module, it definitly needs some testing!
+
 0.83 2009/11/08
 
   - added four missing dispatch events from Bot::Basicbot: nick_change,
     kicked, topic and userquit. All four can now be handled by modules.
   - converted some evaled expressions to code blocks
-  - docuemnted a problem with hash signs in yaml configuration files
+  - documented a problem with hash signs in yaml configuration files
 
 0.82 2009/08/31
 

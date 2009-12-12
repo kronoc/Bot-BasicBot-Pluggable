@@ -111,7 +111,9 @@ DESCRIPTION
 
 METHODS
     new(key => value, ...)
-        Create a new Bot. Identical to the "new" method in Bot::BasicBot.
+        Create a new Bot. Except of the additional attributes loglevel and
+        logconfig identical to the "new" method in Bot::BasicBot. Please
+        refer to their accessor for documentation.
 
     load($module)
         Load a module for the bot by name from "./ModuleName.pm" or
@@ -151,6 +153,21 @@ METHODS
     store
         Returns the bot's object store; see Bot::BasicBot::Pluggable::Store.
 
+    log Logs all of its argument to loglevel info. Please do not use this
+        function in new code, it's simple provided as fallback for old
+        modules.
+
+    loglevel
+        Returns the bots loglevel or sets it if an argument is supplied. It
+        expects trace, debug, info, warn, error or fatal as value.
+
+    logconfig
+        Returns the bot configuration file for logging. Please refer to
+        Log::Log4perl::Config for the configurations files format. Setting
+        this to a differant file after calling init() has no effect.
+
+        Returns or set
+
     dispatch($method_name, $method_params)
         Call the named $method on every loaded module with that method name.
 
@@ -184,7 +201,7 @@ AUTHOR
 
 CREDITS
     Bot::BasicBot was written initially by Mark Fowler, and worked on
-    heavily by Simon Kent, who was kind enough to apply some patches I
+    heavily by Simon Kent, who was kind enough to apply some patches we
     needed for Pluggable. Eventually. Oh, yeah, and I stole huge chunks of
     docs from the Bot::BasicBot source too. I spent a lot of time in the
     mozbot code, and that has influenced my ideas for Pluggable. Mostly to

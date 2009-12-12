@@ -39,6 +39,18 @@ Read config options from specified FILE. For a discussion of possible
 value and format refer to the section CONFIGFILE. The default to read
 the configfile found by L<Config::Find>.
 
+=item --logconfig FILE
+
+The logging configuration will be read from the specified file.
+Please refer to L<Log::Log4perl::Config> for its format. The paramter
+loglevel will be ignored if this options is supplied.
+
+=item --loglevel LEVEL
+
+Sets the bots loglevel to one of the following levels in decreasing
+order of output: trace, debug, info, warn, error or fatal. Defaults
+to warn.
+
 =item --nick NICKNAME
 
 Nickname to use. Defaults to I<basicbot>.
@@ -103,6 +115,12 @@ you just receive garbage.
 
 Port to connect to on target host. This defaults to the irc standard
 port 6667. You won't need to define this in most cases.
+
+=item --command-line
+
+The bot does not connect to any irc server, but will wait on stdin on
+commands from the user. This mode won't actually work with a lot of irc
+related modules like ChanOp.
 
 =back
 

@@ -9,9 +9,6 @@ use lib $Bin;
 
 my $bot = Test::Bot::BasicBot::Pluggable->new();
 
-# this one is a complete bugger to build
-eval "use XML::Feed";
-our $HAS_XML_FEED = $@ ? 0 : 1;
 
 ok( my $ib = $bot->load("Infobot"), "Loaded infobot module");
 
@@ -86,12 +83,24 @@ is( $bot->tell_direct("no, bar is yellow"), "Okay.", "Can explicitly redefine fa
 is( $bot->tell_indirect("bar?"), "bar is yellow", "changed" );
 
 # factoids can contain RSS
-{ local $TODO = !$HAS_XML_FEED;
-is( $bot->tell_direct("rsstest is <rss=\"file:///$Bin/test.rss\">"), "Okay.", "set RSS" );
-is( $bot->tell_indirect("rsstest?"), "title", "can read rss");
+SKIP: {
+    eval "use XML::Feed";
+    skip 'XML::Feed not installed', 4 if $@;
 
-$bot->tell_direct("rsstest2 is <rss=\"file:///$Bin/05infobot.t\">");
-like( $bot->tell_indirect("rsstest2?"), qr{rsstest2 is << Error parsing RSS from file:///.*/05infobot.t: Cannot detect feed type >>}, "can't read rss");
+    is( $bot->tell_direct("rsstest is <rss=\"file:///$Bin/test.rss\">"),
+        "Okay.", "set RSS" );
+    is( $bot->tell_indirect("rsstest?"), "title", "can read rss" );
+    $bot->tell_direct("rsstest2 is <rss=\"file:///$Bin/05infobot.t\">");
+    like(
+        $bot->tell_indirect("rsstest2?"),
+qr{rsstest2 is << Error parsing RSS from file:///.*/05infobot.t: Cannot detect feed type >>},
+        "can't read rss"
+    );
+    is(
+        $bot->tell_direct("literal rsstest?"),
+        "rsstest =is= <rss=\"file:///$Bin/test.rss\">",
+        "literal of rsstest"
+    );
 }
 
 
@@ -107,8 +116,6 @@ ok( !$bot->tell_direct("dkjsdlfkdsjfglkdsfjglfkdjgldksfjglkdfjglds is mumu"),
 $ib->set("user_stopwords", $old_stopwords);
 
 # literal syntax
-is( $bot->tell_direct("literal rsstest?"), "rsstest =is= <rss=\"file:///$Bin/test.rss\">",
-  "literal of rsstest" );
 ok( $bot->tell_direct("bar is also fum"), "bar also fum" );
 is( $bot->tell_direct("literal bar?"), "bar =is= yellow =or= fum", "bar" );
 

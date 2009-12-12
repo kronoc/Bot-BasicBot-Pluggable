@@ -20,7 +20,7 @@ Bot::BasicBot::Pluggable::Store::Memory - use memory (RAM) to provide a storage 
 =head1 DESCRIPTION
 
 This is a L<Bot::BasicBot::Pluggable::Store> that uses memory (RAM)
-to store the values set by modules. This spell the obvious out, this
+to store the values set by modules. To spell the obvious out, this
 means that your data won't persist between invocations of your bot. So
 this is mainly for testing and storing data for a short time.
 
@@ -48,4 +48,5 @@ Mario Domgoergen <mdom@cpan.org>
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
 
-=cut
+
+

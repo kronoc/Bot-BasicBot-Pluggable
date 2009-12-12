@@ -1,60 +1,3 @@
-=head1 NAME
-
-Bot::BasicBot::Pluggable::Module::Google - searches Google for terms and spellings
-
-=head1 IRC USAGE
-
-=over 4
-
-=item google <terms>
-
-Returns Google hits for the terms given.
-
-=item spell <term>
-
-Returns a Google spelling suggestion for the term given.
-
-=back
-
-=head1 VARS
-
-To set module variables, use L<Bot::BasicBot::Pluggable::Module::Vars>.
-
-=over 4
-
-=item google_key
-
-A valid Google API key is required for lookups.
-
-=item languages
-
-Defaults to 'en'; a space-separated list of language restrictions.
-
-=item num_results
-
-Defaults to 3; the number of Google search results to return (maximum 10).
-
-=item require_addressing
-
-Defaults to 1; whether you need to address the bot for Google searches.
-
-=back
-
-=head1 REQUIREMENTS
-
-L<Net::Google>
-
-L<http://www.google.com/apis/>
-
-=head1 AUTHOR
-
-Mario Domgoergen <mdom@cpan.org>
-
-This program is free software; you can redistribute it
-and/or modify it under the same terms as Perl itself.
-
-=cut
-
 package Bot::BasicBot::Pluggable::Module::Google;
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -110,3 +53,61 @@ sub told {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Bot::BasicBot::Pluggable::Module::Google - searches Google for terms and spellings
+
+=head1 IRC USAGE
+
+=over 4
+
+=item google <terms>
+
+Returns Google hits for the terms given.
+
+=item spell <term>
+
+Returns a Google spelling suggestion for the term given.
+
+=back
+
+=head1 VARS
+
+To set module variables, use L<Bot::BasicBot::Pluggable::Module::Vars>.
+
+=over 4
+
+=item google_key
+
+A valid Google API key is required for lookups.
+
+=item languages
+
+Defaults to 'en'; a space-separated list of language restrictions.
+
+=item num_results
+
+Defaults to 3; the number of Google search results to return (maximum 10).
+
+=item require_addressing
+
+Defaults to 1; whether you need to address the bot for Google searches.
+
+=back
+
+=head1 REQUIREMENTS
+
+L<Net::Google>
+
+L<http://www.google.com/apis/>
+
+=head1 AUTHOR
+
+Mario Domgoergen <mdom@cpan.org>
+
+This program is free software; you can redistribute it
+and/or modify it under the same terms as Perl itself.
+
