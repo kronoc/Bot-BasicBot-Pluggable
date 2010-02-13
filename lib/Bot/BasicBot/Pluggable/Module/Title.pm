@@ -7,6 +7,7 @@ use Text::Unidecode;
 use URI::Title qw(title);
 use URI::Find::Simple qw(list_uris);
 use URI;
+
 sub help {
     return "Speaks the title of URLs mentioned.";
 }
@@ -23,21 +24,22 @@ sub init {
 }
 
 sub admin {
+
     # do this in admin so we always get a chance to see titles
-    my ($self, $mess) = @_;
+    my ( $self, $mess ) = @_;
 
     my $ignore_regexp = $self->get('user_ignore_re');
 
     my $reply = "";
-    for (list_uris($mess->{body})) {
+    for ( list_uris( $mess->{body} ) ) {
         next if $ignore_regexp && /$ignore_regexp/;
-        my $uri   = URI->new($_);
+        my $uri = URI->new($_);
         next unless $uri;
-        if ($uri->scheme eq "file") {
-             next unless $self->get("user_be_rude");
-             my $who  = $mess->{who};
-             $self->reply($mess, "Nice try $who, you tosser");
-             return undef;
+        if ( $uri->scheme eq "file" ) {
+            next unless $self->get("user_be_rude");
+            my $who = $mess->{who};
+            $self->reply( $mess, "Nice try $who, you tosser" );
+            return;
         }
 
         my $title = title("$_");
@@ -46,9 +48,9 @@ sub admin {
         $reply .= "[ $title ] ";
     }
 
-    if ($reply) { $self->reply($mess, $reply) }
+    if ($reply) { $self->reply( $mess, $reply ) }
 
-    return undef; # Title.pm is passive, and doesn't intercept things.
+    return;    # Title.pm is passive, and doesn't intercept things.
 }
 
 1;
@@ -89,6 +91,3 @@ Mario Domgoergen <mdom@cpan.org>
 
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
-
-
-

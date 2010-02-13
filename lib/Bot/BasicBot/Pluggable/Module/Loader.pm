@@ -5,61 +5,63 @@ use strict;
 use Try::Tiny;
 
 sub init {
-    my $self = shift;
+    my $self    = shift;
     my @modules = $self->store_keys;
     for (@modules) {
-      try   { $self->{Bot}->load($_) } 
-      catch { warn "Error loading $_: $@."  };
+        try { $self->{Bot}->load($_) } catch { warn "Error loading $_: $@." };
     }
 }
 
 sub help {
-    return "Module loader and unloader. Usage: !load <module>, !unload <module>, !reload <module>, !list.";
+    return
+"Module loader and unloader. Usage: !load <module>, !unload <module>, !reload <module>, !list.";
 }
 
 sub maybe_join {
-	my ($sep,@list) = @_;
-	return $list[0]         if  @list == 1;
-	return join($sep,@list) if  @list > 1;
-	return ''               if !@list;
-	return;
+    my ( $sep, @list ) = @_;
+    return $list[0] if @list == 1;
+    return join( $sep, @list ) if @list > 1;
+    return '' if !@list;
+    return;
 }
 
 sub told {
-    my ($self, $mess) = @_;
+    my ( $self, $mess ) = @_;
     my $body = $mess->{body};
-
 
     # we don't care about commands that don't start with '!'
     return 0 unless defined $body;
-	return 0 unless $body =~ /^!/;
+    return 0 unless $body =~ /^!/;
 
-    return if ! $self->authed($mess->{who});
+    return if !$self->authed( $mess->{who} );
 
-    my ($command, $param) = split(/\s+/, $body, 2);
+    my ( $command, $param ) = split( /\s+/, $body, 2 );
     $command = lc($command);
 
-    if ($command eq "!list") {
-	my %available = map { lc $_ => $_ } $self->bot->available_modules();
-	my @loaded    = map { delete $available{$_} } @{$self->bot->handlers()};
-	my @available = values %available;
+    if ( $command eq "!list" ) {
+        my %available = map { lc $_ => $_ } $self->bot->available_modules();
+        my @loaded = map { delete $available{$_} } @{ $self->bot->handlers() };
+        my @available = values %available;
 
-	my $loaded    = maybe_join(', ', sort @loaded);
-	my $available = maybe_join(', ', sort @available);
+        my $loaded    = maybe_join( ', ', sort @loaded );
+        my $available = maybe_join( ', ', sort @available );
         return "Loaded modules: $loaded\nAvailable modules: $available";
 
-    } elsif ($command eq "!load") {
+    }
+    elsif ( $command eq "!load" ) {
         try { $self->bot->load($param) } catch { return "Failed: $@." };
         $self->set( $param => 1 );
         return "Success.";
 
-    } elsif ($command eq "!reload") {
+    }
+    elsif ( $command eq "!reload" ) {
         try { $self->bot->reload($param) } catch { return "Failed: $@." };
         return "Success.";
 
-    } elsif ($command eq "!unload") {
+    }
+    elsif ( $command eq "!unload" ) {
         try { $self->bot->unload($param) } catch { return "Failed: $@." };
-        $self->unset( $param );
+        $self->unset($param);
         return "Success.";
     }
 }

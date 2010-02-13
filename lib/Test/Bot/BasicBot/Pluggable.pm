@@ -35,17 +35,18 @@ sub tell {
         address    => $addressed,
         reply_hook => sub { push @reply, $_[1]; },    # $_[1] is the reply text
     };
-    if ($body =~ /^help/ and $addressed ) {
-	push @reply, $bot->help($message);
-    } else {
-    	$bot->said($message);
+    if ( $body =~ /^help/ and $addressed ) {
+        push @reply, $bot->help($message);
+    }
+    else {
+        $bot->said($message);
     }
     return join "\n", @reply;
 }
 
 sub connect {
-  my $self = shift;
-  $self->dispatch('connected');
+    my $self = shift;
+    $self->dispatch('connected');
 }
 
 # otherwise AUTOLOAD in Bot::BasicBot will be called

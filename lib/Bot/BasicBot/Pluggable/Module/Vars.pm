@@ -4,40 +4,47 @@ use warnings;
 use strict;
 
 sub help {
-    return "Change internal module variables. Usage: !set <module> <variable> <value>, !unset <module> <variable>, !vars <module>.";
+    return
+"Change internal module variables. Usage: !set <module> <variable> <value>, !unset <module> <variable>, !vars <module>.";
 }
 
 sub told {
-    my($self, $mess) = @_;
+    my ( $self, $mess ) = @_;
     my $body = $mess->{body};
-	return 0 unless defined $body;
-    my ($command, $mod, $var, $value) = split(/\s+/, $body, 4);
+    return 0 unless defined $body;
+    my ( $command, $mod, $var, $value ) = split( /\s+/, $body, 4 );
     $command = lc($command);
 
-    return if ! $self->authed($mess->{who});
+    return if !$self->authed( $mess->{who} );
 
-    if ($command eq "!set") {
+    if ( $command eq "!set" ) {
         my $module = $self->{Bot}->module($mod);
         return "No such module '$module'." unless $module;
-        $value = defined($value) ? $value : ''; # wipe if no value.
-        $module->set("user_$var", $value);
+        $value = defined($value) ? $value : '';    # wipe if no value.
+        $module->set( "user_$var", $value );
         return "Set.";
 
-    } elsif ($command eq "!unset") {
+    }
+    elsif ( $command eq "!unset" ) {
         return "Usage: !unset <module> <variable>." unless $var;
         my $module = $self->{Bot}->module($mod);
         return "No such module '$module'." unless $module;
         $module->unset("user_$var");
         return "Unset.";
 
-    } elsif ($command eq "!vars") {
-	return "You must pass a module" unless defined $mod;
+    }
+    elsif ( $command eq "!vars" ) {
+        return "You must pass a module" unless defined $mod;
         my $module = $self->bot->module($mod);
         return "No such module '$mod'." unless $module;
-        my @vars = map { s/^user_// ? $_ : () } $module->store_keys( res => [ "^user" ] );
+        my @vars =
+          map { my $mod = $_; $mod =~ s/^user_// ? $mod : () }
+          $module->store_keys( res => ["^user"] );
         return "$mod has no variables." unless @vars;
-        return "Variables for $mod: " .
-          (join ", ", map { "'$_' => '".$module->get("user_$_")."'" } @vars).".";
+        return "Variables for $mod: "
+          . (
+            join ", ", map { "'$_' => '" . $module->get("user_$_") . "'" } @vars
+          ) . ".";
     }
 }
 
@@ -84,6 +91,3 @@ Mario Domgoergen <mdom@cpan.org>
 
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
-
-
-

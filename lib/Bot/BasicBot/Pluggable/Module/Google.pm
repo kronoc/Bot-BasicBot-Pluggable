@@ -18,36 +18,48 @@ sub init {
 }
 
 sub help {
-    return "Searches Google for terms and spellings. Usage: google <terms>, spell <words>.";
+    return
+"Searches Google for terms and spellings. Usage: google <terms>, spell <words>.";
 }
 
 sub told {
-    my ($self, $mess) = @_;
+    my ( $self, $mess ) = @_;
     my $body = $mess->{body};
 
-    return if ($self->get("user_require_addressing") and not $mess->{address});
+    return
+      if ( $self->get("user_require_addressing") and not $mess->{address} );
 
-    my ($command, $param) = split(/\s+/, $body, 2);
+    my ( $command, $param ) = split( /\s+/, $body, 2 );
     $command = lc($command);
 
-    if ($command eq "google") {
-        return "No Google key has been set! Set it with '!set Google google_key <key>'." unless $self->get("user_google_key");
-        return "Your configuration has exceeded the maximum number of allowed Google results (10)." if $self->get("user_num_results") > 10;
+    if ( $command eq "google" ) {
+        return
+"No Google key has been set! Set it with '!set Google google_key <key>'."
+          unless $self->get("user_google_key");
+        return
+"Your configuration has exceeded the maximum number of allowed Google results (10)."
+          if $self->get("user_num_results") > 10;
 
-        my $google = Net::Google->new(key=>$self->get("user_google_key"));
-        my $search = $google->search(lr=>qw($self->get("user_languages")), max_results=>$self->get("user_num_results"));
-        $search->query(split(/\s+/, $param));
+        my $google = Net::Google->new( key => $self->get("user_google_key") );
+        my $search = $google->search(
+            lr          => qw($self->get("user_languages")),
+            max_results => $self->get("user_num_results")
+        );
+        $search->query( split( /\s+/, $param ) );
 
-        my $res; # magical concatenation of all results.
-        $res .= $_->title.": ".$_->URL."\n" for @{$search->results()};
-        $res =~ s/<[^>]+>//g; # remove the bolded search terms.
+        my $res;    # magical concatenation of all results.
+        $res .= $_->title . ": " . $_->URL . "\n" for @{ $search->results() };
+        $res =~ s/<[^>]+>//g;    # remove the bolded search terms.
 
         return $res ? $res : "No results for \'$param\'.";
 
-    } elsif ($command eq "spell") {
-        return "No Google key has been set! Set it with '!set Google google_key <key>'." unless $self->get("user_google_key");
-        my $google = Net::Google->new(key=>$self->get("user_google_key"));
-        my $res = $google->spelling(phrase=>$param)->suggest();
+    }
+    elsif ( $command eq "spell" ) {
+        return
+"No Google key has been set! Set it with '!set Google google_key <key>'."
+          unless $self->get("user_google_key");
+        my $google = Net::Google->new( key => $self->get("user_google_key") );
+        my $res = $google->spelling( phrase => $param )->suggest();
         return $res ? $res : "No results for \'$param\'.";
     }
 }
@@ -110,4 +122,3 @@ Mario Domgoergen <mdom@cpan.org>
 
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
-

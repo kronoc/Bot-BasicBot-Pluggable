@@ -26,7 +26,7 @@ sub isop {
 sub deop_op {
     my ( $self, $op, $who, @channels ) = @_;
     for my $channel (@channels) {
-        if ( $self->isop() ) {
+        if ( $self->isop($channel) ) {
             $self->bot->mode("$channel $op $who");
             return "Okay, i $op you in $channel";
         }
@@ -59,9 +59,8 @@ sub seen {
         my ( $min, $max ) = ( sort { $a <=> $b } @timestamps )[ 0, -1 ];
         my $seconds = $max - $min;
         if ( $seconds > $self->get('user_flood_seconds') ) {
-            $self->kick(
-                $channel, $who,
-                "Stop flooding the channel ("
+            $self->kick( $channel, $who,
+                    "Stop flooding the channel ("
                   . @timestamps
                   . " messages in $seconds seconds)." );
         }
@@ -74,17 +73,18 @@ sub admin {
     my $who = $message->{who};
     if ( $self->authed($who) and $self->private($message) ) {
         my $body = $message->{body};
-        my ( $command, $rest ) = split( ' ', $body, 2 );
-        if ( $command eq ' !op ' ) {
-            my @channels = split( ' ', $rest );
+        $body =~ s/(^\s+|\s+$)//g;
+        my ( $command, $rest ) = split(/\s+/, $body, 2 );
+        if ( $command eq '!op' ) {
+            my @channels = split(/\s+/, $rest );
             return $self->op( $who, @channels );
         }
-        elsif ( $command eq ' !deop ' ) {
-            my @channels = split( ' ', $rest );
+        elsif ( $command eq '!deop' ) {
+            my @channels = split(/\s+/, $rest );
             return $self->deop( $who, @channels );
         }
-        elsif ( $command eq ' !kick ' ) {
-            my ( $channel, $user, $reason ) = split( ' ', $rest, 3 );
+        elsif ( $command eq '!kick' ) {
+            my ( $channel, $user, $reason ) = split(/\s+/, $rest, 3 );
             if ( $self->isop($channel) ) {
                 $self->bot->kick( $channel, $who, $reason );
                 return "Okay, kicked $who from $channel.";
@@ -98,7 +98,6 @@ sub admin {
 
 sub chanjoin {
     my ( $self, $message ) = @_;
-    $self->isop('#botzone');
     if ( $self->get('user_auto_op') ) {
         my $who = $message->{who};
         if ( $self->authed($who) ) {
@@ -168,30 +167,9 @@ Maximum numbers of messages per user in C<user_flood_seconds>. Defaults to 6.
 
 C<user_flood_seconds>. Defaults to 6.
 
-=head1 TODO
-
-=over 4
-
-=item Flood control is still missing
-
-=back
-
 =head1 VERSION
 
 0.01
-
-=head1 AUTHOR
-
-Mario Domgoergen <mdom@cpan.org>
-
-=head1 BUGS
-
-All users are admins. This is fine at the moment, as the only things that need
-you to be logged in are admin functions. Passwords are stored in plaintext, and
-are trivial to extract for any module on the system. I don't consider this a
-bug, because I assume you trust the modules you're loading. If Auth is I<not>
-loaded, all users effectively have admin permissions. This may not be a good
-idea, but is also not an Auth bug, it's an architecture bug.
 
 =head1 AUTHOR
 

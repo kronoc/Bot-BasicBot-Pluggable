@@ -2,7 +2,7 @@ package Bot::BasicBot::Pluggable;
 use warnings;
 use strict;
 
-our $VERSION = '0.84';
+our $VERSION = '0.85';
 
 use POE;
 use Bot::BasicBot;
@@ -62,7 +62,7 @@ sub init_logging {
         Log::Log4perl->init( $self->logconfig );
     }
     else {
-	my $loglevel = $self->loglevel;
+        my $loglevel = $self->loglevel;
         Log::Log4perl::init( \ <<EOT );
 	log4perl.rootLogger=$loglevel,Screen
 	log4perl.appender.Screen = Log::Log4perl::Appender::Screen
@@ -91,7 +91,7 @@ sub load {
 
     # it's safe to die here, mostly this call is eval'd.
     $logger->logdie("Cannot load module with a name") unless $module;
-    $logger->logdie("Module $module already loaded")  if $self->handler($module);
+    $logger->logdie("Module $module already loaded") if $self->handler($module);
 
     # This is possible a leeeetle bit evil.
     $logger->info("Loading module $module");
@@ -104,7 +104,7 @@ sub load {
     no warnings 'redefine';
     delete $INC{$file};
 
-    try {require $file } catch { die "Can't load $module: $_"; };
+    try { require $file } catch { die "Can't load $module: $_"; };
 
     # Ok, it's very evil. Don't bother me, I'm working.
 
@@ -157,8 +157,13 @@ sub available_modules {
       map { substr( ( File::Spec->splitpath($_) )[2], 0, -3 ) } glob('./*.pm'),
       glob('./modules/*.pm');
     my @central_modules =
-      map { s/^Bot::BasicBot::Pluggable::Module:://; $_ } $self->_available;
-    return sort @local_modules, @central_modules;
+      map {
+        my $mod = $_;
+        $mod =~ s/^Bot::BasicBot::Pluggable::Module:://;
+        $mod;
+      } $self->_available();
+    my @modules = sort @local_modules, @central_modules;
+    return @modules;
 }
 
 # deprecated methods
@@ -238,7 +243,7 @@ sub dispatch {
             $logger->warn($_);
         }
     }
-    return undef;
+    return;
 }
 
 sub help {
@@ -263,7 +268,8 @@ sub help {
                 return $handler->help($mess);
             }
             catch {
-                $logger->warn("Error calling help for handler $mess->{body}: $_" );
+                $logger->warn(
+                    "Error calling help for handler $mess->{body}: $_");
             }
         }
         else {
@@ -313,7 +319,7 @@ sub dispatch_priorities {
             }
         }
     }
-    return undef;
+    return;
 }
 
 sub reply {
@@ -335,16 +341,19 @@ BEGIN {
           /
     );
     my @priority_events = (qw/ said emoted /);
-    no strict 'refs';
-    for my $event (@dispatchable_events) {
-        *$event = sub {
-            shift->dispatch( $event, @_ );
-        };
-    }
-    for my $event (@priority_events) {
-        *$event = sub {
-            shift->dispatch_priorities( $event, @_ );
-        };
+    {
+        ## no critic qw(ProhibitNoStrict)
+        no strict 'refs';
+        for my $event (@dispatchable_events) {
+            *$event = sub {
+                shift->dispatch( $event, @_ );
+            };
+        }
+        for my $event (@priority_events) {
+            *$event = sub {
+                shift->dispatch_priorities( $event, @_ );
+            };
+        }
     }
 }
 
@@ -603,6 +612,3 @@ L<Bot::BasicBot>
 Infobot: http://www.infobot.org/
 
 Mozbot: http://www.mozilla.org/projects/mozbot/
-
-
-

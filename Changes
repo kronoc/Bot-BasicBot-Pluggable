@@ -1,5 +1,14 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
+0.85 2009/02/13
+
+  This is the David-Precious-aka-bigpresh-release, who commited all
+  changes via Github. Thanks!
+
+  - Join: Don't accept commands to join/part channels unless the
+    user asking us to do so 
+  - ChanOp: Make the ChanOp module actually work (uhm...)
+
 0.84 2009/12/11
 
   - Log4Perl: Instead of just printing error messages to stdout,

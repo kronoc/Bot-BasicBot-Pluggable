@@ -24,6 +24,7 @@ Module::Build->new(
         'URI::Find::Simple'    => 0,
         'URI::Title'           => '0.1',
         'Try::Tiny'            => 0,
+        'Module::Load'         => 0,
     },
     recommends => {
         'XML::Feed'   => 0,

@@ -8,12 +8,13 @@ use LWP::UserAgent ();
 use URI;
 
 # this one is a complete bugger to build
-eval "use XML::Feed";
+eval { require XML::Feed };
 our $HAS_XML_FEED = $@ ? 0 : 1;
 
 sub init {
     my $self = shift;
-    $self->config({
+    $self->config(
+        {
             user_allow_searching  => 0,
             user_min_length       => 3,
             user_max_length       => 25,
@@ -23,64 +24,69 @@ sub init {
             user_require_question => 1,
             user_http_timeout     => 10,
             user_rss_items        => 5,
-            user_stopwords => "here|how|it|something|that|this|what|when|where|which|who|why",
-            user_unknown_responses => "Dunno.|I give up.|I have no idea.|No clue. Sorry.|Search me, bub.|Sorry, I don't know.",
+            user_stopwords =>
+              "here|how|it|something|that|this|what|when|where|which|who|why",
+            user_unknown_responses =>
+"Dunno.|I give up.|I have no idea.|No clue. Sorry.|Search me, bub.|Sorry, I don't know.",
             db_version => "1",
-    });
+        }
+    );
 
     # record what we've asked other bots.
     $self->{remote_infobot} = {};
 }
 
 sub help {
-    return "An infobot. See http://search.cpan.org/perldoc?Bot::BasicBot::Pluggable::Module::Infobot.";
+    return
+"An infobot. See http://search.cpan.org/perldoc?Bot::BasicBot::Pluggable::Module::Infobot.";
 }
 
 sub told {
-    my ($self, $mess) = @_;
+    my ( $self, $mess ) = @_;
     my $body = $mess->{body};
-	return unless defined $body;
+    return unless defined $body;
+
     # looks like an infobot reply.
-    if ($body =~ s/^:INFOBOT:REPLY (\S+) (.*)$//) {
-        return $self->infobot_reply($1, $2, $mess);
+    if ( $body =~ s/^:INFOBOT:REPLY (\S+) (.*)$// ) {
+        return $self->infobot_reply( $1, $2, $mess );
     }
 
     # direct commands must be addressed.
     return unless $mess->{address};
 
-
     # forget a particular factoid.
-    if ($body =~ /^forget\s+(.*)$/i) {
+    if ( $body =~ /^forget\s+(.*)$/i ) {
         return $self->delete_factoid($1)
           ? "I forgot about $1."
           : "I don't know anything about $1.";
     }
 
     # ask another bot for facts.
-    if ($body =~ /^ask\s+(\S+)\s+about\s+(.*)$/i) {
-        $self->ask_factoid($2, $1, $mess);
+    if ( $body =~ /^ask\s+(\S+)\s+about\s+(.*)$/i ) {
+        $self->ask_factoid( $2, $1, $mess );
         return "I'll ask $1 about $2.";
     }
 
     # tell someone else about a factoid
-    if ($body =~ /^tell\s+(\S+)\s+about\s+(.*)$/i) {
-        $self->tell_factoid($2, $1, $mess);
+    if ( $body =~ /^tell\s+(\S+)\s+about\s+(.*)$/i ) {
+        $self->tell_factoid( $2, $1, $mess );
         return "Told $1 about $2.";
     }
 
     # search for a particular factoid.
-    if ($body =~ /^search\s+for\s+(.*)$/i) {
-        return "privmsg only, please" unless ($mess->{channel} eq "msg");
+    if ( $body =~ /^search\s+for\s+(.*)$/i ) {
+        return "privmsg only, please" unless ( $mess->{channel} eq "msg" );
         return "searching disabled" unless $self->get("user_allow_searching");
-        my @results = $self->search_factoid(split(/\s+/, $1));
+        my @results = $self->search_factoid( split( /\s+/, $1 ) );
         unless (@results) { return "I don't know anything about $1."; }
-        $#results = $self->get("user_num_results") - 1 unless $#results < $self->get("user_num_results");
-        return "I know about: ".join(", ", map { "'$_'" } @results) .".";
+        $#results = $self->get("user_num_results") - 1
+          unless $#results < $self->get("user_num_results");
+        return "I know about: " . join( ", ", map { "'$_'" } @results ) . ".";
     }
 }
 
 sub fallback {
-    my ($self, $mess) = @_;
+    my ( $self, $mess ) = @_;
     my $body = $mess->{body} || "";
 
     my $is_priv = !defined $mess->{channel} || $mess->{channel} eq 'msg';
@@ -89,39 +95,43 @@ sub fallback {
     # a valid factoid for "$mess->{who}'s $object".
     $body =~ s/^my /$mess->{who}'s /;
 
+    my %stopwords =
+      map { lc($_) => 1 }
+      split( /\s*[\s,\|]\s*/, $self->get("user_stopwords") );
 
-    my %stopwords = map { lc($_) => 1 } split(/\s*[\s,\|]\s*/, $self->get("user_stopwords"));
-
-
-    # checks to see if something starts 
-    #     <word> (is|are) 
+    # checks to see if something starts
+    #     <word> (is|are)
     # and then removes if if <word> is a stopword
     # this means that we treat "what is foo?" as "foo?"
-    if ($body =~ /^(.*?)\s+(is|are)\s+(.*)$/i) {
+    if ( $body =~ /^(.*?)\s+(is|are)\s+(.*)$/i ) {
         $body =~ s/^(.*?)\s+(is|are)\s+//i if $stopwords{$1};
     }
 
-    # answer a factoid. this is a crazy check which ensures we will ONLY answer
-    # a factoid if a) there is, or isn't, a question mark, b) we have, or haven't,
-    # been addressed, c) the factoid is bigger and smaller than our requirements,
-    # and d) that it doesn't look like a to-be-learned factoid (which is important
-    # if the user has disabled the requiring of the question mark for answering.)
-    my $body_regexp = $self->get("user_require_question") && !$is_priv ? qr/\?+$/ : qr/[.!?]*$/;
-    if ($body =~ s/$body_regexp// and ($mess->{address} or $self->get("user_passive_answer")) and
-        length($body) >= $self->get("user_min_length") and length($body) <= $self->get("user_max_length")
-        and $body !~ /^(.*?)\s+(is|are)\s+(.*)$/i) {
+  # answer a factoid. this is a crazy check which ensures we will ONLY answer
+  # a factoid if a) there is, or isn't, a question mark, b) we have, or haven't,
+  # been addressed, c) the factoid is bigger and smaller than our requirements,
+  # and d) that it doesn't look like a to-be-learned factoid (which is important
+  # if the user has disabled the requiring of the question mark for answering.)
+    my $body_regexp =
+      $self->get("user_require_question") && !$is_priv ? qr/\?+$/ : qr/[.!?]*$/;
+    if (    $body =~ s/$body_regexp//
+        and ( $mess->{address} or $self->get("user_passive_answer") )
+        and length($body) >= $self->get("user_min_length")
+        and length($body) <= $self->get("user_max_length")
+        and $body !~ /^(.*?)\s+(is|are)\s+(.*)$/i )
+    {
 
         # get the factoid and type of relationship
-        my ($is_are, $factoid, $literal) = $self->get_factoid($body);
-        if (!$literal && $factoid && $factoid =~ /\|/) {
-		my @f = split /\|/,$factoid;
-		$factoid = $f[ int(rand(scalar @f) ) ];
-	}
+        my ( $is_are, $factoid, $literal ) = $self->get_factoid($body);
+        if ( !$literal && $factoid && $factoid =~ /\|/ ) {
+            my @f = split /\|/, $factoid;
+            $factoid = $f[ int( rand( scalar @f ) ) ];
+        }
 
         # no factoid?
         unless ($factoid) {
-            my @unknowns = split(/\|/, $self->get("user_unknown_responses"));
-            my $unknown = $unknowns[int(rand(scalar(@unknowns))) - 1];
+            my @unknowns = split( /\|/, $self->get("user_unknown_responses") );
+            my $unknown = $unknowns[ int( rand( scalar(@unknowns) ) ) - 1 ];
             return $mess->{address} ? $unknown : undef;
         }
 
@@ -129,230 +139,250 @@ sub fallback {
         $factoid =~ s/\$who/$mess->{who}/g;
 
         # emote?
-        if ($factoid =~ s/^<action>\s*//i) {
-            $self->bot->emote({
-                who     => $mess->{who},
-                channel => $mess->{channel},
-                body    => $factoid }
-            ); return 1; 
+        if ( $factoid =~ s/^<action>\s*//i ) {
+            $self->bot->emote(
+                {
+                    who     => $mess->{who},
+                    channel => $mess->{channel},
+                    body    => $factoid
+                }
+            );
+            return 1;
 
-        # replying with, or without a noun? hmMmMmmm?!
-        } elsif ($literal)  {
-        $body =~ s!^literal\s+!!;
-        return "$body =${is_are}= $factoid";
-    } else { 
-        return $factoid =~ s/^<reply>\s*//i ? $factoid : "$body $is_are $factoid"; 
-    }
+            # replying with, or without a noun? hmMmMmmm?!
+        }
+        elsif ($literal) {
+            $body =~ s!^literal\s+!!;
+            return "$body =${is_are}= $factoid";
+        }
+        else {
+            return $factoid =~ s/^<reply>\s*//i
+              ? $factoid
+              : "$body $is_are $factoid";
+        }
     }
 
     # the only thing left is learning factoids. are we
     # addressed or are we willing to learn passively?
     # does it even look like a factoid?
-    return unless ($mess->{address} or $self->get("user_passive_learn"));
-    return unless ($body =~ /^(.*?)\s+(is)\s+(.*)$/i or $body =~ /^(.*?)\s+(are)\s+(.*)$/i);
-    my ($object, $is_are, $description) = ($1, $2, $3);
-    my $literal = ($object =~ s!^literal\s+!!);
+    return unless ( $mess->{address} or $self->get("user_passive_learn") );
+    return
+      unless ( $body =~ /^(.*?)\s+(is)\s+(.*)$/i
+        or $body =~ /^(.*?)\s+(are)\s+(.*)$/i );
+    my ( $object, $is_are, $description ) = ( $1, $2, $3 );
+    my $literal = ( $object =~ s!^literal\s+!! );
 
     # allow corrections and additions.
-    my ($nick, $replace, $also) = ($self->bot->nick, 0, 0);
-    $replace = 1 if ($object =~ s/no,?\s+//i);                     # no, $object is $fact.
-    $replace = 1 if ($replace and $object =~ s/^\s*$nick,?\s*//i); # no, $bot, $object is $fact.
-    $also    = 1 if ($description =~ s/^also\s+//i);               # $object is also $fact.
+    my ( $nick, $replace, $also ) = ( $self->bot->nick, 0, 0 );
+    $replace = 1 if ( $object =~ s/no,?\s+//i );    # no, $object is $fact.
+    $replace = 1
+      if ( $replace and $object =~ s/^\s*$nick,?\s*//i )
+      ;    # no, $bot, $object is $fact.
+    $also = 1 if ( $description =~ s/^also\s+//i );    # $object is also $fact.
 
     # ignore short, long, and stopword'd factoids.
     return if length($object) < $self->get("user_min_length");
     return if length($object) > $self->get("user_max_length");
-    foreach (keys %stopwords) { return if $object =~ /^$_\b/; }
+    foreach ( keys %stopwords ) { return if $object =~ /^$_\b/; }
 
     # if we're replacing things, remove the factoid first.
     # $also check supports "no, $bot, $object is also $fact".
-    if ($replace and !$also) {
+    if ( $replace and !$also ) {
         $self->delete_factoid($object);
     }
 
     # get any current factoid there might be.
-    my ($type, $current) = $self->get_factoid($object);
+    my ( $type, $current ) = $self->get_factoid($object);
 
-    # we can't add without explicit instruction, 
+    # we can't add without explicit instruction,
     # but shouldn't warn if this is passive.
-    if ($current and !$also and $mess->{address}) {
+    if ( $current and !$also and $mess->{address} ) {
         return "... but $object $type $current ...";
-    } elsif ($current and !$also and !$mess->{address}) {
-        return undef;
+    }
+    elsif ( $current and !$also and !$mess->{address} ) {
+        return;
     }
 
-    
-
     # add this factoid. this comment is absolutely useless. excelsior.
-    $self->add_factoid($object, $is_are, split(/\s+or\s+/, $description) );
+    $self->add_factoid( $object, $is_are, split( /\s+or\s+/, $description ) );
 
     # return an ack if we were addressed only
     return $mess->{address} ? "Okay." : 1;
 }
 
 sub get_factoid {
-  my ($self, $object) = @_;
+    my ( $self, $object ) = @_;
 
-  my $literal = ($object =~ s!^literal\s+!!);
+    my $literal = ( $object =~ s!^literal\s+!! );
 
+    # get a list of factoid hashes
+    my ( $is_are, @factoids ) = $self->get_raw_factoids($object);
 
-  
-  # get a list of factoid hashes
-  my ($is_are, @factoids) = $self->get_raw_factoids($object);
+    return unless @factoids;
 
-  return unless @factoids;  
-  #print STDERR Dumper(@factoids);
+    #print STDERR Dumper(@factoids);
 
-  # simple is a list of the 'simple' factoids, a is b, etc. These are just
-  # joined together. Alternates are factoids that are an alternative to
-  # the simple factoids, they will randomly be displayed _instead_.
-  my (@simple, @alternatives);
+    # simple is a list of the 'simple' factoids, a is b, etc. These are just
+    # joined together. Alternates are factoids that are an alternative to
+    # the simple factoids, they will randomly be displayed _instead_.
+    my ( @simple, @alternatives );
 
-  for (@factoids) {
-    next if $_->{text} =~ m!^\s*$!;
-    if ($_->{alternate} || $_->{alt} ) {
-      push @alternatives, $_->{text};
-    } else {
-      push @simple, $_->{text};
+    for (@factoids) {
+        next if $_->{text} =~ m!^\s*$!;
+        if ( $_->{alternate} || $_->{alt} ) {
+            push @alternatives, $_->{text};
+        }
+        else {
+            push @simple, $_->{text};
+        }
     }
-  }
 
-  if ($literal) {
-     my $return .= join " =or= ", (@simple, map { "|$_" } @alternatives);
-     return ($is_are, $return, 1);
-  }  
+    if ($literal) {
+        my $return .= join " =or= ", ( @simple, map { "|$_" } @alternatives );
+        return ( $is_are, $return, 1 );
+    }
 
-  #print STDERR Dumper(@alternatives);
+    #print STDERR Dumper(@alternatives);
 
-  # the simple list is one of the alternatives
-  unshift(@alternatives, join(" or ", @simple)) if @simple;
+    # the simple list is one of the alternatives
+    unshift( @alternatives, join( " or ", @simple ) ) if @simple;
 
-  # pick an option at random
-  srand();
-  my $factoid = $alternatives[ rand(@alternatives) ];
-  #print STDERR "$factoid\n";
-  # if there are any RSS directives, get the feed.
-  # TODO - this could be done in a more general way, with plugins
-  # TODO - this blocks. Bad. you can knock the bot off channel by
-  # giving it an RSS feed that'll take a very long time to return.
-  $factoid =~ s/<(?:rss|atom|feed|xml)\s*=\s*\"?([^>\"]+)\"?>/$self->parseFeed($1)/ieg;
+    # pick an option at random
+    srand();
+    my $factoid = $alternatives[ rand(@alternatives) ];
 
-  return ($is_are, $factoid, 0);
+    #print STDERR "$factoid\n";
+    # if there are any RSS directives, get the feed.
+    # TODO - this could be done in a more general way, with plugins
+    # TODO - this blocks. Bad. you can knock the bot off channel by
+    # giving it an RSS feed that'll take a very long time to return.
+    $factoid =~
+      s/<(?:rss|atom|feed|xml)\s*=\s*\"?([^>\"]+)\"?>/$self->parseFeed($1)/ieg;
+
+    return ( $is_are, $factoid, 0 );
 }
 
 # for a given key, return the raw hashes that are in the store for this
 # factoid.
 sub get_raw_factoids {
-  my ($self, $object) = @_;
-  my $raw = $self->get( "infobot_".lc($object) )
-    or return ();
+    my ( $self, $object ) = @_;
+    my $raw = $self->get( "infobot_" . lc($object) )
+      or return ();
 
-  #print STDERR Dumper($raw);
-  my ($is_are, @factoids);
+    #print STDERR Dumper($raw);
+    my ( $is_are, @factoids );
 
-  if (ref($raw)) {
-    # it's a deep structure
-    $is_are = $raw->{is_are};
-    @factoids = @{ $raw->{factoids} || [] };
+    if ( ref($raw) ) {
 
-  } else {
-    # old-style tab seperated thing
-    my @strings;
-    ($is_are, @strings) = split(/\t/, $raw);
-    for my $text (@strings) {
-      my $alt = ($text =~ s/^\|\s*// ? 1 : 0);
-      push @factoids, { alternate => $alt, text => $text };
+        # it's a deep structure
+        $is_are = $raw->{is_are};
+        @factoids = @{ $raw->{factoids} || [] };
+
     }
-  }
+    else {
 
-  return ($is_are, @factoids);
+        # old-style tab seperated thing
+        my @strings;
+        ( $is_are, @strings ) = split( /\t/, $raw );
+        for my $text (@strings) {
+            my $alt = ( $text =~ s/^\|\s*// ? 1 : 0 );
+            push @factoids, { alternate => $alt, text => $text };
+        }
+    }
+
+    return ( $is_are, @factoids );
 }
 
 sub add_factoid {
-  my ($self, $object, $is_are, @factoids) = @_;
+    my ( $self, $object, $is_are, @factoids ) = @_;
 
-  # get the current list, if any
-  my ($current_is_are, @current) = $self->get_raw_factoids($object);
-  
-  # if there's already an is_are set, use it.
-  $is_are = $current_is_are if ($current_is_are);
-  $is_are ||= "is"; # defaults
+    # get the current list, if any
+    my ( $current_is_are, @current ) = $self->get_raw_factoids($object);
 
-  # add these factoids to the list, trimming trailing space after |
-  for (@factoids) {
-    my $alt = s/^\|\s*// ? 1 : 0;
-    push @current, {
-      alternate => $alt,
-      text => $_,
+    # if there's already an is_are set, use it.
+    $is_are = $current_is_are if ($current_is_are);
+    $is_are ||= "is";    # defaults
+
+    # add these factoids to the list, trimming trailing space after |
+    for (@factoids) {
+        my $alt = s/^\|\s*// ? 1 : 0;
+        push @current,
+          {
+            alternate => $alt,
+            text      => $_,
+          };
+    }
+
+    my $set = {
+        is_are   => $is_are,
+        factoids => \@current,
     };
-  }
 
-  my $set = {
-    is_are => $is_are,
-    factoids => \@current,
-  };
+    # put the list back into the store.
+    $self->set( "infobot_" . lc($object), $set );
 
-  # put the list back into the store.
-  $self->set( "infobot_".lc($object), $set);
-  
-  
-  return 1;
+    return 1;
 }
 
 sub delete_factoid {
-  my ($self, $object) = @_;
-  my $key = "infobot_".lc($object);
-  if ($self->get($key)){
-	$self->unset( "infobot_".lc($object) );
-  	return 1;
-  } else {
+    my ( $self, $object ) = @_;
+    my $key = "infobot_" . lc($object);
+    if ( $self->get($key) ) {
+        $self->unset( "infobot_" . lc($object) );
+        return 1;
+    }
+    else {
         return 0;
-  }
+    }
 }
 
 sub ask_factoid {
-  my ($self, $object, $ask, $mess) = @_;
+    my ( $self, $object, $ask, $mess ) = @_;
 
-  # unique ID to reference this in future
-  my $id = "<" . int(rand(100000)) . ">";
+    # unique ID to reference this in future
+    my $id = "<" . int( rand(100000) ) . ">";
 
-  # store the message, so we can reply in context later
-  $self->{remote_infobot}{$id} = $mess;
+    # store the message, so we can reply in context later
+    $self->{remote_infobot}{$id} = $mess;
 
-  # ask, using an infobot protocol, the thing we've been told to ask.
-  # this will hopefully result in a reply coming back later.
-  $self->bot->say(
-    who => $ask,
-    channel=>'msg',
-    body=>":INFOBOT:QUERY $id $object"
-  );
+    # ask, using an infobot protocol, the thing we've been told to ask.
+    # this will hopefully result in a reply coming back later.
+    $self->bot->say(
+        who     => $ask,
+        channel => 'msg',
+        body    => ":INFOBOT:QUERY $id $object"
+    );
 }
 
 sub tell_factoid {
-  my ($self, $object, $tell, $mess) = @_;
+    my ( $self, $object, $tell, $mess ) = @_;
 
-  my ($is_are, $factoid) = $self->get_factoid($object);
-  my $from = $mess->{who};
+    my ( $is_are, $factoid ) = $self->get_factoid($object);
+    my $from = $mess->{who};
 
-  $self->bot->say(
-    who => $tell,
-    channel=> 'msg',
-    body=> "$from wanted you to know: $object $is_are $factoid"
-  );
+    $self->bot->say(
+        who     => $tell,
+        channel => 'msg',
+        body    => "$from wanted you to know: $object $is_are $factoid"
+    );
 }
 
 sub search_factoid {
-  my ($self, @terms) = @_;
-  my @keys;
-  for (@terms) {
-    push @keys, map { s/^infobot_// ? $_ : () } $self->store_keys( limit => $self->get("user_num_results"), res => [ "$_" ] );
-  }
-  return @keys;
+    my ( $self, @terms ) = @_;
+    my @keys;
+    for (@terms) {
+        push @keys,
+          map { my $term = $_; $term =~ s/^infobot_// ? $term : () }
+          $self->store_keys(
+            limit => $self->get("user_num_results"),
+            res   => ["$_"]
+          );
+    }
+    return @keys;
 }
 
-
 sub parseFeed {
-    my ($self, $url) = @_;
+    my ( $self, $url ) = @_;
 
     my @items;
     eval {
@@ -370,15 +400,15 @@ sub parseFeed {
         }
         my @entries   = $feed->entries();
         my $max_items = $self->get('user_rss_items');
-        if ($max_items and $max_items < @entries) {
+        if ( $max_items and $max_items < @entries ) {
             splice( @entries, $max_items );
         }
         @items = map { $_->title } @entries;
-    }; 
-    if ($@) {
-	chomp $@;
-    	return "<< Error parsing RSS from $url: $@ >>";
     };
+    if ($@) {
+        chomp $@;
+        return "<< Error parsing RSS from $url: $@ >>";
+    }
 
     my $ret;
     foreach my $title (@items) {
@@ -389,35 +419,34 @@ sub parseFeed {
         $ret .= "${title}; ";
     }
     $ret =~ s/\s*;\s*$//;
-    return ( $ret =~ m/^<(reply|action)>/ ? $ret : "<reply>$ret");
+    return ( $ret =~ m/^<(reply|action)>/ ? $ret : "<reply>$ret" );
 }
 
 # We've been replied to by an infobot.
 sub infobot_reply {
-  my ($self, $id, $return, $mess) = @_;
+    my ( $self, $id, $return, $mess ) = @_;
 
-  # get the message that caused the ask initially, so we can reply to it
-  # if there wasn't one, just give up.
-  my $infobot_data = $self->{remote_infobot}{$id} or return 1;
+    # get the message that caused the ask initially, so we can reply to it
+    # if there wasn't one, just give up.
+    my $infobot_data = $self->{remote_infobot}{$id} or return 1;
 
-  # this is the string that the other infobot returned to us.
-  my ($object, $db, $factoid) = ($return =~ /^(.*) =(\w+)=> (.*)$/);
+    # this is the string that the other infobot returned to us.
+    my ( $object, $db, $factoid ) = ( $return =~ /^(.*) =(\w+)=> (.*)$/ );
 
-  $self->set_factoid($mess->{who}, $object, $db, $factoid);
+    $self->set_factoid( $mess->{who}, $object, $db, $factoid );
 
-  # reply to the original request saying 'we got it'
-  $self->bot->say(
-    channel => $infobot_data->{channel},
-    who     => $infobot_data->{who},
-    body    => "Learnt about $object from $mess->{who}",
-  );
+    # reply to the original request saying 'we got it'
+    $self->bot->say(
+        channel => $infobot_data->{channel},
+        who     => $infobot_data->{who},
+        body    => "Learnt about $object from $mess->{who}",
+    );
 
-  return 1;
+    return 1;
 
 }
 
 1;
-
 
 __END__
 

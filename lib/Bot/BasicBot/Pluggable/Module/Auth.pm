@@ -107,13 +107,12 @@ sub admin {
     elsif ( $body =~ /^!users/ ) {
         return "Users: "
           . join( ", ",
-            map { s/^password_// ? $_ : () }
+            map { my $user = $_; $user =~ s/^password_// ? $user : () }
               $self->store_keys( res => ["^password"] ) )
           . ".";
-
     }
     else {
-        return undef
+        return
           if $self->get("allow_anonymous") || $self->authed( $mess->{who} );
         return "You need to authenticate.";
     }

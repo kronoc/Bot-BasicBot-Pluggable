@@ -1,29 +1,35 @@
 package Bot::BasicBot::Pluggable::Store;
-use warnings;
 use strict;
+use warnings;
 use Carp qw( croak );
 use Data::Dumper;
 use Storable qw( nfreeze thaw );
+use Try::Tiny;
+use Module::Load qw();
+use Log::Log4perl;
 
 use base qw( );
 
 sub new {
     my $class = shift;
     my $self;
+    my $logger = Log::Log4perl->get_logger($class);
     if ( @_ % 2 == 0 ) {
-        $self = bless { @_ } => $class;
+        $self = bless {@_} => $class;
     }
     elsif ( @_ == 1 and ref $_[0] eq 'HASH' ) {
-        $self = $class->new_from_hashref($_[0] );
+        $self = $class->new_from_hashref( $_[0] );
     }
-    elsif ( @_ == 1 and ! ref $_[0]) {
-        $self = $class->new_from_hashref({ type => $_[0] });
+    elsif ( @_ == 1 and !ref $_[0] ) {
+        $self = $class->new_from_hashref( { type => $_[0] } );
     }
     elsif ( !@_ ) {
         $self = bless {} => $class;
     }
     else {
-        croak "Argument to new() is neither an argument list, a hashref, a string nor empty";
+        $logger->warn(
+"Argument to new() is neither an argument list, a hashref, a string nor empty"
+        );
     }
     $self->init();
     $self->load();
@@ -32,9 +38,10 @@ sub new {
 
 sub new_from_hashref {
     my ( $class, $args ) = @_;
+    my $logger = Log::Log4perl->get_logger($class);
 
     if ( ref($args) ne 'HASH' ) {
-        croak('Argument to store_from_hashref must be a hashref');
+        $logger->warn('Argument to store_from_hashref must be a hashref');
     }
 
     my $store_class = delete $args->{type} || 'Memory';
@@ -43,8 +50,8 @@ sub new_from_hashref {
       unless $store_class =~ /::/;
 
     # load the store class
-    eval "require $store_class";
-    croak "Couldn't load $store_class - $@" if $@;
+    try { Module::Load::load $store_class; }
+    catch { $logger->warn("Couldn't load $store_class - $_"); };
 
     my $store = $store_class->new( %{$args} );
 
@@ -145,7 +152,6 @@ sub restore {
 }
 
 1;
-
 __END__
 
 =head1 NAME
@@ -169,8 +175,6 @@ Store classes should subclass this and provide some persistent way of storing th
 
 =over 4
 
-
-
 =item new()
 
 Standard C<new> method, blesses a hash into the right class and
@@ -182,8 +186,6 @@ it will try to call new_from_hashref with a hash reference { type
 => $string }. Calls C<load()> to load any internal variables, then
 C<init>, which you can also override in your module.
 
-
-
 =item new_from_hashref( $hashref )
 
 Intended to be called as class method to dynamically create a store
@@ -193,25 +195,17 @@ be either a fully qualified classname or a colonless string that
 is appended to I<Bot::BasicBot::Pluggable::Store>. All other arguments
 are passed down to the real object constructor.
 
-
-
 =item init()
 
 Called as part of new class construction, before C<load()>.
-
-
 
 =item load()
 
 Called as part of new class construction, after C<init()>.
 
-
-
 =item save()
 
 Subclass me. But, only if you want to. See ...Store::Storable.pm as an example.
-
-
 
 =item keys($namespace,[$regex])
 
@@ -219,31 +213,21 @@ Returns a list of all store keys for the passed C<$namespace>.
 
 If you pass C<$regex> then it will only pass the keys matching C<$regex>
 
-
-
 =item get($namespace, $variable)
 
 Returns the stored value of the C<$variable> from C<$namespace>.
-
-
 
 =item set($namespace, $variable, $value)
 
 Sets stored value for C<$variable> to C<$value> in C<$namespace>. Returns store object.
 
-
-
 =item unset($namespace, $variable)
 
 Removes the C<$variable> from the store. Returns store object.
 
-
-
 =item namespaces()
 
 Returns a list of all namespaces in the store.
-
-
 
 =item dump()
 
@@ -256,13 +240,9 @@ you can convert from one store to another easily, i.e.:
 
 C<dump> is written generally so you don't have to re-implement it in subclasses.
 
-
-
 =item restore($data)
 
 Restores the store from a L<dump()>.
-
-
 
 =back
 
@@ -273,13 +253,8 @@ Mario Domgoergen <mdom@cpan.org>
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
 
-
-
 =head1 SEE ALSO
 
 L<Bot::BasicBot::Pluggable>
 
 L<Bot::BasicBot::Pluggable::Module>
-
-
-

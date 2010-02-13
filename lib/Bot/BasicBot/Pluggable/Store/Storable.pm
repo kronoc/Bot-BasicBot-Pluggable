@@ -8,33 +8,33 @@ use File::Temp qw(tempfile);
 use base qw( Bot::BasicBot::Pluggable::Store );
 
 sub init {
-	my $self = shift;
-	if (!$self->{dir}) {
-	   	$self->{dir} = File::Spec->curdir();
-	}
+    my $self = shift;
+    if ( !$self->{dir} ) {
+        $self->{dir} = File::Spec->curdir();
+    }
 }
 
 sub save {
-  my $self = shift;
-  my $namespace = shift;
-  my @modules = $namespace ? ($namespace) : keys(%{ $self->{store} });
+    my $self      = shift;
+    my $namespace = shift;
+    my @modules   = $namespace ? ($namespace) : keys( %{ $self->{store} } );
 
-  for my $name ( @modules ) {
-    my $filename = File::Spec->catfile($self->{dir},$name.".storable");
-    my ($fh,$tempfile) = tempfile( UNLINK => 0 );
-    nstore($self->{store}{$name}, $tempfile)
-      or die "Cannot save to $tempfile\n";
-    rename $tempfile,$filename 
-      or die "Cannot create $filename\n";
-  }
+    for my $name (@modules) {
+        my $filename = File::Spec->catfile( $self->{dir}, $name . ".storable" );
+        my ( $fh, $tempfile ) = tempfile( UNLINK => 0 );
+        nstore( $self->{store}{$name}, $tempfile )
+          or die "Cannot save to $tempfile\n";
+        rename $tempfile, $filename
+          or die "Cannot create $filename\n";
+    }
 }
 
 sub load {
-  my $self = shift;
-  for my $file (glob File::Spec->catfile($self->{dir},'*.storable')) {
-    my ($name) = $file =~ /^(.*?)\.storable$/;
-    $self->{store}{$name} = retrieve($file);
-  }
+    my $self = shift;
+    for my $file ( glob File::Spec->catfile( $self->{dir}, '*.storable' ) ) {
+        my ($name) = $file =~ /^(.*?)\.storable$/;
+        $self->{store}{$name} = retrieve($file);
+    }
 }
 
 1;
@@ -64,6 +64,3 @@ Mario Domgoergen <mdom@cpan.org>
 
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
-
-
-

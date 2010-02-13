@@ -20,38 +20,51 @@ sub connected {
 }
 
 sub help {
-    return "Join and leave channels. Usage: join <channel>, leave/part <channel>, channels. Requires direct addressing.";
+    return
+"Join and leave channels. Usage: join <channel>, leave/part <channel>, channels. Requires direct addressing.";
 }
 
 sub told {
-    my ($self, $mess) = @_;
+    my ( $self, $mess ) = @_;
     my $body = $mess->{body};
-	return unless defined $body;
+    return unless defined $body;
     return unless $mess->{address};
 
-    my ($command, $param) = split(/\s+/, $body, 2);
+    if (!$self->authed($mess->{who})) {
+        return "Sorry, you must be authenticated to do that.";
+    }
+
+    my ( $command, $param ) = split( /\s+/, $body, 2 );
     $command = lc($command);
 
-    if ($command eq "join") {
+    if ( $command eq "join" ) {
         $self->add_channel($param);
         return "Ok.";
 
-    } elsif ($command eq "leave" or $command eq "part") {
-        $self->remove_channel($param || $mess->{channel});
+    }
+    elsif ( $command eq "leave" or $command eq "part" ) {
+        $self->remove_channel( $param || $mess->{channel} );
         return "Ok.";
 
-    } elsif ($command eq "channels") {
-	my @channels = $self->bot->channels;
-	my $channel_num = scalar @channels;
-	if ($channel_num == 0) {
-		return "I'm not in any channel.";
-	} elsif ( $channel_num == 1 ) {
-		return "I'm in " . $channels[0] . "." ;
-	} elsif ( $channel_num == 2 ) {
-		return "I'm in " . $channels[0] . " and " . $channels[1] . ".";
-	} else {
-        	return "I'm in ". join(', ', @channels[0 .. $#channels-1]) . " and $channels[-1].";
-	}
+    }
+    elsif ( $command eq "channels" ) {
+        my @channels    = $self->bot->channels;
+        my $channel_num = scalar @channels;
+        if ( $channel_num == 0 ) {
+            return "I'm not in any channel.";
+        }
+        elsif ( $channel_num == 1 ) {
+            return "I'm in " . $channels[0] . ".";
+        }
+        elsif ( $channel_num == 2 ) {
+            return "I'm in " . $channels[0] . " and " . $channels[1] . ".";
+        }
+        else {
+            return
+                "I'm in "
+              . join( ', ', @channels[ 0 .. $#channels - 1 ] )
+              . " and $channels[-1].";
+        }
     }
 }
 
@@ -70,12 +83,12 @@ sub chanpart {
 }
 
 sub add_channel {
-    my ($self, $channel) = @_;
+    my ( $self, $channel ) = @_;
     $self->bot->join($channel);
 }
 
 sub remove_channel {
-    my ($self, $channel) = @_;
+    my ( $self, $channel ) = @_;
     $self->bot->part($channel);
 }
 
@@ -117,6 +130,3 @@ Mario Domgoergen <mdom@cpan.org>
 
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
-
-
-

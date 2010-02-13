@@ -108,12 +108,11 @@ sub said {
 
 sub authed {
     my ( $self, $who ) = @_;
-    if ($self->bot->module('Auth')) {
-	 return $self->bot->module('Auth')->authed($who);
+    if ( $self->bot->module('Auth') ) {
+        return $self->bot->module('Auth')->authed($who);
     }
     return 0;
 }
-
 
 sub init      { undef }
 sub connected { undef }
@@ -160,7 +159,6 @@ may change at any time:
   my $count = $self->get("count");
   $self->set( count => $count + 1 );
 
-
 Keys that begin "user_" are considered _USER_ variables, and can be changed by
 administrators in the IRC channel using L<Bot::BasicBot::Pluggable::Module::Vars>.
 Don't use them as unchecked input data.
@@ -175,13 +173,11 @@ Standard C<new> method, blesses a hash into the right class and puts any
 key/value pairs passed to it into the blessed hash. Calls C<init> to load
 any internal or user variables you may have set in your module.
 
-
 =item init()
 
 Called as part of new class construction. May or may not be after
 server connection. Override this to do things when your module is added
 to the bot.
-
 
 =item config($config)
 
@@ -189,7 +185,6 @@ Set every key in the hash reference $config to its default value
 if it is not already defined in the module store. In that case the
 value from the store is used to initialise the variable. Typically
 called in the module's init functions.
-
 
 =item start()
 
@@ -203,51 +198,41 @@ TODO - this method not yet implemented.
 
 Called just before your module is removed from the bot. Do cleanup here.
 
-
 =item bot()
 
 Returns the L<Bot::BasicBot::Pluggable> bot we're running under.
-
 
 =item store
 
 Returns L<Bot::BasicBot::Pluggable::Store> subclass used to store variables.
 
-
 =item get($name)
 
 Returns the value of a local variable from the object store.
-
 
 =item set($name => $value)
 
 Set a local variable into the object store.
 
-
 =item unset($name)
 
 Unsets a local variable - removes it from the store, not just C<undef>s it.
-
 
 =item var($name, [$value])
 
 C<get()> or C<set()> a local variable from the module store.
 
-
 =item store_keys
 
 Returns a list of all keys in the object store.
-
 
 =item connected
 
 Called when the bot connects to the server. The return value is meaningless.
 
-
 =item chanjoin($message)
 
 Called when a user joins a channel.
-
 
 =item userquit($message)
 
@@ -300,7 +285,6 @@ Convenience method to send message to nick (privmsg) or channel (public):
   $self->tell('tom', "hello there, fool");
   $self->tell('#sailors', "hello there, sailor");
 
-
 =item said($message, $priority)
 
 This method is called whenever the bot sees something said. The first parameter
@@ -333,7 +317,6 @@ in order - this will lead to nicer code. This approach is new, though, which
 is why it's not yet used in most of the shipped modules yet. It will eventually
 become the only thing to do, and I will deprecate C<said()>.
 
-
 =item replied($message,$reply)
 
 This method is called every time a module returns an reply. The first
@@ -346,11 +329,9 @@ is mainly meant to log the bots activity.
 
 Like C<said()>; called if you don't override C<said()>, but only for priority 0.
 
-
 =item admin($message)
 
 Like C<said()>; called if you don't override C<said()>, but only for priority 1.
-
 
 =item told($message)
 
@@ -377,7 +358,6 @@ authentication level via Auth.pm. It is exactly equivalent to
 
     $self->bot->module('Auth')
       and $self->bot->module('Auth')->authed($who);
-
 
 =back
 
