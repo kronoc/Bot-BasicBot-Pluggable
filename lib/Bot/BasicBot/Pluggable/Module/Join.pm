@@ -30,12 +30,13 @@ sub told {
     return unless defined $body;
     return unless $mess->{address};
 
+    my ( $command, $param ) = split( /\s+/, $body, 2 );
+    $command = lc($command);
+    return unless $command =~ /^(join|leave|part|channels)$/;
+
     if (!$self->authed($mess->{who})) {
         return "Sorry, you must be authenticated to do that.";
     }
-
-    my ( $command, $param ) = split( /\s+/, $body, 2 );
-    $command = lc($command);
 
     if ( $command eq "join" ) {
         $self->add_channel($param);

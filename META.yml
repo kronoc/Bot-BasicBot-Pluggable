@@ -1,6 +1,6 @@
 ---
 name: Bot-BasicBot-Pluggable
-version: 0.85
+version: 0.86
 author:
   - 'Mario Domgoergen <mdom@cpan.org>'
 abstract: extended simple IRC bot for pluggable modules
@@ -40,7 +40,7 @@ provides:
     file: lib/App/Bot/BasicBot/Pluggable/Terminal.pm
   Bot::BasicBot::Pluggable:
     file: lib/Bot/BasicBot/Pluggable.pm
-    version: 0.85
+    version: 0.86
   Bot::BasicBot::Pluggable::Module:
     file: lib/Bot/BasicBot/Pluggable/Module.pm
   Bot::BasicBot::Pluggable::Module::Auth:
