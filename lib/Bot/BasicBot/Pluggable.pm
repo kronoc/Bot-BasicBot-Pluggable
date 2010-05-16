@@ -1,11 +1,11 @@
 package Bot::BasicBot::Pluggable;
+$Bot::BasicBot::Pluggable::VERSION = '0.87';
 use warnings;
 use strict;
 
-our $VERSION = '0.86';
-
+use 5.8.0;
 use POE;
-use Bot::BasicBot;
+use Bot::BasicBot 0.60;
 use Log::Log4perl;
 use Log::Log4perl::Level;
 use base qw( Bot::BasicBot );
@@ -364,6 +364,10 @@ __END__
 =head1 NAME
 
 Bot::BasicBot::Pluggable - extended simple IRC bot for pluggable modules
+
+=head1 VERSION
+
+version 0.87
 
 =head1 SYNOPSIS
 

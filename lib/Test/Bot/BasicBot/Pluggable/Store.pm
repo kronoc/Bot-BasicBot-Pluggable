@@ -1,9 +1,8 @@
 package Test::Bot::BasicBot::Pluggable::Store;
+$Test::Bot::BasicBot::Pluggable::Store::VERSION = '0.87';
 use base qw(Test::Builder::Module);
 use strict;
 use warnings;
-
-our $VERSION = '0.1';
 
 our @EXPORT = qw(store_ok);
 
@@ -43,6 +42,10 @@ __END__
 =head1 NAME
 
 Test::Bot::BasicBot::Pluggable::Store - basics tests for Bot::BasicBot::Pluggable storage classes
+
+=head1 VERSION
+
+version 0.87
 
 =head1 SYNOPSIS
 

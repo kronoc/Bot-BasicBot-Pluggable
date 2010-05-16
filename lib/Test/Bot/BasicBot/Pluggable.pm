@@ -1,9 +1,8 @@
 package Test::Bot::BasicBot::Pluggable;
+$Test::Bot::BasicBot::Pluggable::VERSION = '0.87';
 use warnings;
 use strict;
 use base qw( Bot::BasicBot::Pluggable );
-
-our $VERSION = '0.1';
 
 sub new {
     my ( $class, %args ) = @_;
@@ -59,6 +58,10 @@ __END__
 =head1 NAME
 
 Test::Bot::BasicBot::Pluggable - utilities to aid in testing of Bot::BasicBot::Pluggable modules
+
+=head1 VERSION
+
+version 0.87
 
 =head1 SYNOPSIS
 
@@ -128,10 +131,6 @@ for it.
 =head1 BUGS AND LIMITATIONS
 
 There are no methods to test join, part and emote.
-
-=head1 VERSION
-
-0.1
 
 =head1 AUTHOR
 

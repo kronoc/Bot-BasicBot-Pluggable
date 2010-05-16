@@ -1,5 +1,13 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
+0.87 2010/05/09
+  
+  Remove all recommends due some failing tests. In a future release,
+  some of the modules with long dependencies will be removed from
+  this distribution and form their own on CPAN. I look at you DBI...
+
+  Switched to Dist::Zilla
+
 0.86 2010/03/28
 
   Thanks to Jacob Helwig for the follwoing changes:

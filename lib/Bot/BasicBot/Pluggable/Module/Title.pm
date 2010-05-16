@@ -1,4 +1,5 @@
 package Bot::BasicBot::Pluggable::Module::Title;
+$Bot::BasicBot::Pluggable::Module::Title::VERSION = '0.87';
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
 use strict;
@@ -60,6 +61,10 @@ __END__
 =head1 NAME
 
 Bot::BasicBot::Pluggable::Module::Title - speaks the title of URLs mentioned
+
+=head1 VERSION
+
+version 0.87
 
 =head1 IRC USAGE
 

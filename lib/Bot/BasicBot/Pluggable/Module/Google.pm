@@ -1,4 +1,5 @@
 package Bot::BasicBot::Pluggable::Module::Google;
+$Bot::BasicBot::Pluggable::Module::Google::VERSION = '0.87';
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
 use strict;
@@ -71,6 +72,10 @@ __END__
 =head1 NAME
 
 Bot::BasicBot::Pluggable::Module::Google - searches Google for terms and spellings
+
+=head1 VERSION
+
+version 0.87
 
 =head1 IRC USAGE
 

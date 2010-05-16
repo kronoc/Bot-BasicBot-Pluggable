@@ -1,92 +1,52 @@
 ---
-name: Bot-BasicBot-Pluggable
-version: 0.86
+abstract: 'extended simple IRC bot for pluggable modules'
 author:
   - 'Mario Domgoergen <mdom@cpan.org>'
-abstract: extended simple IRC bot for pluggable modules
-license: perl
-resources:
-  license: http://dev.perl.org/licenses/
-  repository: http://github.com/mdom/bot-basicbot-pluggable
-requires:
-  Bot::BasicBot: 0.60
-  Config::Find: 0
-  Getopt::Long: 0
-  LWP::UserAgent: 0
-  List::MoreUtils: 0
-  Log::Log4perl: 0
-  Module::Load: 0
-  Module::Pluggable: 0
-  Moose: 0
-  MooseX::Getopt: 0
-  MooseX::SimpleConfig: 0
-  Test::More: 0.01
-  Text::Unidecode: 0
-  Try::Tiny: 0
-  URI::Find::Simple: 0
-  URI::Title: 0.1
-  perl: v5.8.0
-recommends:
-  DBD::SQLite: 0
-  DBI: 0
-  DBM::Deep: 0
-  XML::Feed: 0
+build_requires:
+  FindBin: 0
+  Module::Build: 0.3601
+  Test::More: 0
+  Test::Perl::Critic: 0
+  Test::PerlTidy: 0
 configure_requires:
-  Module::Build: 0.35
-provides:
-  App::Bot::BasicBot::Pluggable:
-    file: lib/App/Bot/BasicBot/Pluggable.pm
-  App::Bot::BasicBot::Pluggable::Terminal:
-    file: lib/App/Bot/BasicBot/Pluggable/Terminal.pm
-  Bot::BasicBot::Pluggable:
-    file: lib/Bot/BasicBot/Pluggable.pm
-    version: 0.86
-  Bot::BasicBot::Pluggable::Module:
-    file: lib/Bot/BasicBot/Pluggable/Module.pm
-  Bot::BasicBot::Pluggable::Module::Auth:
-    file: lib/Bot/BasicBot/Pluggable/Module/Auth.pm
-  Bot::BasicBot::Pluggable::Module::Base:
-    file: lib/Bot/BasicBot/Pluggable/Module/Base.pm
-  Bot::BasicBot::Pluggable::Module::ChanOp:
-    file: lib/Bot/BasicBot/Pluggable/Module/ChanOp.pm
-    version: 0.01
-  Bot::BasicBot::Pluggable::Module::DNS:
-    file: lib/Bot/BasicBot/Pluggable/Module/DNS.pm
-  Bot::BasicBot::Pluggable::Module::Google:
-    file: lib/Bot/BasicBot/Pluggable/Module/Google.pm
-  Bot::BasicBot::Pluggable::Module::Infobot:
-    file: lib/Bot/BasicBot/Pluggable/Module/Infobot.pm
-  Bot::BasicBot::Pluggable::Module::Join:
-    file: lib/Bot/BasicBot/Pluggable/Module/Join.pm
-  Bot::BasicBot::Pluggable::Module::Karma:
-    file: lib/Bot/BasicBot/Pluggable/Module/Karma.pm
-  Bot::BasicBot::Pluggable::Module::Loader:
-    file: lib/Bot/BasicBot/Pluggable/Module/Loader.pm
-  Bot::BasicBot::Pluggable::Module::Seen:
-    file: lib/Bot/BasicBot/Pluggable/Module/Seen.pm
-  Bot::BasicBot::Pluggable::Module::Title:
-    file: lib/Bot/BasicBot/Pluggable/Module/Title.pm
-  Bot::BasicBot::Pluggable::Module::Vars:
-    file: lib/Bot/BasicBot/Pluggable/Module/Vars.pm
-  Bot::BasicBot::Pluggable::Store:
-    file: lib/Bot/BasicBot/Pluggable/Store.pm
-  Bot::BasicBot::Pluggable::Store::DBI:
-    file: lib/Bot/BasicBot/Pluggable/Store/DBI.pm
-  Bot::BasicBot::Pluggable::Store::Deep:
-    file: lib/Bot/BasicBot/Pluggable/Store/Deep.pm
-  Bot::BasicBot::Pluggable::Store::Memory:
-    file: lib/Bot/BasicBot/Pluggable/Store/Memory.pm
-  Bot::BasicBot::Pluggable::Store::Storable:
-    file: lib/Bot/BasicBot/Pluggable/Store/Storable.pm
-  Bot::BasicBot::Pluggable::Terminal:
-    file: lib/Bot/BasicBot/Pluggable/Terminal.pm
-  Test::Bot::BasicBot::Pluggable:
-    file: lib/Test/Bot/BasicBot/Pluggable.pm
-    version: 0.1
-  Test::Bot::BasicBot::Pluggable::Store:
-    file: lib/Test/Bot/BasicBot/Pluggable/Store.pm
-    version: 0.1
-generated_by: Module::Build version 0.35
+  ExtUtils::MakeMaker: 6.31
+  Module::Build: 0.3601
+generated_by: 'Dist::Zilla version 2.100880'
+license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
+name: Bot-BasicBot-Pluggable
+requires:
+  Bot::BasicBot: 0.60
+  CGI: 0
+  Carp: 0
+  Config::Find: 0
+  DBI: 0
+  DBM::Deep: 0
+  Data::Dumper: 0
+  File::Copy: 0
+  File::Spec: 0
+  File::Temp: 0
+  LWP::UserAgent: 0
+  List::MoreUtils: 0
+  Log::Log4perl: 0
+  Log::Log4perl::Level: 0
+  Module::Load: 0
+  Module::Pluggable: 0
+  Moose: 0
+  Moose::Util::TypeConstraints: 0
+  MooseX::Getopt::Dashes: 0
+  MooseX::SimpleConfig: 0
+  POE: 0
+  Socket: 0
+  Storable: 0
+  Test::Builder::Module: 0
+  Text::Unidecode: 0
+  Try::Tiny: 0
+  URI: 0
+  URI::Find::Simple: 0
+  URI::Title: 0
+  XML::Feed: 0
+  perl: 5.8.0
+version: 0.87

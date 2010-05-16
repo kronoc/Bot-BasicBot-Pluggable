@@ -3,3 +3,4 @@
 * better error message and not just echoing into the channel
 * converting store script
 * is the special case of return 1 in said() really needed?
+* remove modules with a lot of dependiencies

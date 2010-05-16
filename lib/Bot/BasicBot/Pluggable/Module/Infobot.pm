@@ -1,7 +1,8 @@
 package Bot::BasicBot::Pluggable::Module::Infobot;
-use base qw(Bot::BasicBot::Pluggable::Module);
-use warnings;
+$Bot::BasicBot::Pluggable::Module::Infobot::VERSION = '0.87';
 use strict;
+use warnings;
+use base qw(Bot::BasicBot::Pluggable::Module);
 
 use Data::Dumper;
 use LWP::UserAgent ();
@@ -453,6 +454,10 @@ __END__
 =head1 NAME
 
 Bot::BasicBot::Pluggable::Module::Infobot - infobot clone redone in B::B::P.
+
+=head1 VERSION
+
+version 0.87
 
 =head1 SYNOPSIS
 

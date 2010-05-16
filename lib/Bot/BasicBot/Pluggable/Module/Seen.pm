@@ -3,6 +3,8 @@ use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
 use strict;
 
+our $VERSION = '0.86';
+
 sub init {
     my $self = shift;
     $self->config( { user_allow_hiding => 1 } );
@@ -118,6 +120,10 @@ __END__
 =head1 NAME
 
 Bot::BasicBot::Pluggable::Module::Seen - track when and where people were seen
+
+=head1 VERSION
+
+version 0.87
 
 =head1 IRC USAGE
 
