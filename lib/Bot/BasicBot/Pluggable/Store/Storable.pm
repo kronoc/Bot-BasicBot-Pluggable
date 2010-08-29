@@ -1,5 +1,7 @@
 package Bot::BasicBot::Pluggable::Store::Storable;
-$Bot::BasicBot::Pluggable::Store::Storable::VERSION = '0.87';
+BEGIN {
+  $Bot::BasicBot::Pluggable::Store::Storable::VERSION = '0.88';
+}
 use warnings;
 use strict;
 use Storable qw( nstore retrieve );
@@ -48,7 +50,7 @@ Bot::BasicBot::Pluggable::Store::Storable - use Storable to provide a storage ba
 
 =head1 VERSION
 
-version 0.87
+version 0.88
 
 =head1 SYNOPSIS
 

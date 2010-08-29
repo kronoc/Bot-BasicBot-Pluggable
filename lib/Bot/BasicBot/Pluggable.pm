@@ -1,5 +1,7 @@
 package Bot::BasicBot::Pluggable;
-$Bot::BasicBot::Pluggable::VERSION = '0.87';
+BEGIN {
+  $Bot::BasicBot::Pluggable::VERSION = '0.88';
+}
 use warnings;
 use strict;
 
@@ -367,7 +369,7 @@ Bot::BasicBot::Pluggable - extended simple IRC bot for pluggable modules
 
 =head1 VERSION
 
-version 0.87
+version 0.88
 
 =head1 SYNOPSIS
 
@@ -573,6 +575,15 @@ its kernel not being run. This is a C<Bot::BasicBot problem>, apparently.
 Reloading a module causes warnings as the old module gets its namespace stomped.
 Not a lot you can do about that. All modules must be in Bot::Pluggable::Module::
 namespace. Well, that's not really a bug.                                                                                       
+
+=head1 NEW MAINTAINER
+
+
+Bot::BasicBot::Pluggable is looking for a new maintainer  (again...)
+as the current maintainer is not using it anymore. Please mail to
+<<mdom@cpan.org>> if you are interested in taking over this fine
+module.
+
 
 =head1 REQUIREMENTS
 

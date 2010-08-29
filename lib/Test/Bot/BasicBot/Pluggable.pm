@@ -1,5 +1,7 @@
 package Test::Bot::BasicBot::Pluggable;
-$Test::Bot::BasicBot::Pluggable::VERSION = '0.87';
+BEGIN {
+  $Test::Bot::BasicBot::Pluggable::VERSION = '0.88';
+}
 use warnings;
 use strict;
 use base qw( Bot::BasicBot::Pluggable );
@@ -61,7 +63,7 @@ Test::Bot::BasicBot::Pluggable - utilities to aid in testing of Bot::BasicBot::P
 
 =head1 VERSION
 
-version 0.87
+version 0.88
 
 =head1 SYNOPSIS
 

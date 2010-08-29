@@ -6,12 +6,11 @@ build_requires:
   FindBin: 0
   Module::Build: 0.3601
   Test::More: 0
-  Test::Perl::Critic: 0
-  Test::PerlTidy: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.31
   Module::Build: 0.3601
-generated_by: 'Dist::Zilla version 2.100880'
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 4.101900, CPAN::Meta::Converter version 2.101670'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -41,7 +40,6 @@ requires:
   POE: 0
   Socket: 0
   Storable: 0
-  Test::Builder::Module: 0
   Text::Unidecode: 0
   Try::Tiny: 0
   URI: 0
@@ -49,4 +47,4 @@ requires:
   URI::Title: 0
   XML::Feed: 0
   perl: 5.8.0
-version: 0.87
+version: 0.88

@@ -1,5 +1,14 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
+0.88 2010/08/29
+
+  Removing build depencies for Test::Perl::Critic and Test::Tidy.
+
+  Bot::BasicBot::Pluggable is looking for a new maintainer  (again...)
+  as the current maintainer is not using it anymore. Please mail
+  to <mdom@cpan.org> if you are interested in taking over this fine
+  module.
+
 0.87 2010/05/09
   
   Remove all recommends due some failing tests. In a future release,
