@@ -7,5 +7,5 @@ use Test::Bot::BasicBot::Pluggable::Store;
 use File::Temp qw(tmpnam);
 my $tempfile = tmpnam();
 
-store_ok( 'DBI', { dsn => "dbi:SQLite:$tempfile", table => "basicbot" } );
+store_ok( 'DBI', { dsn => "dbi:SQLite:$tempfile", table => "basic-bot" } );
 unlink($tempfile);

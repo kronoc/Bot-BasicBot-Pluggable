@@ -1,7 +1,4 @@
 package Bot::BasicBot::Pluggable;
-BEGIN {
-  $Bot::BasicBot::Pluggable::VERSION = '0.88';
-}
 use warnings;
 use strict;
 
@@ -367,10 +364,6 @@ __END__
 
 Bot::BasicBot::Pluggable - extended simple IRC bot for pluggable modules
 
-=head1 VERSION
-
-version 0.88
-
 =head1 SYNOPSIS
 
 =head2 Creating the bot module
@@ -574,16 +567,7 @@ During the C<make>, C<make test>, C<make install> process, POE will moan about
 its kernel not being run. This is a C<Bot::BasicBot problem>, apparently.
 Reloading a module causes warnings as the old module gets its namespace stomped.
 Not a lot you can do about that. All modules must be in Bot::Pluggable::Module::
-namespace. Well, that's not really a bug.                                                                                       
-
-=head1 NEW MAINTAINER
-
-
-Bot::BasicBot::Pluggable is looking for a new maintainer  (again...)
-as the current maintainer is not using it anymore. Please mail to
-<<mdom@cpan.org>> if you are interested in taking over this fine
-module.
-
+namespace. Well, that's not really a bug.
 
 =head1 REQUIREMENTS
 
@@ -592,12 +576,26 @@ Because POE is like that sometimes. You also need L<POE::Component::IRC>.
 Oh, and L<Bot::BasicBot>. Some of the modules will need more modules, e.g.
 Google.pm needs L<Net::Google>. See the module docs for more details.
 
-=head1 AUTHOR
-
-Mario Domgoergen <mdom@cpan.org>
+=head1 LICENSE
 
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
+
+=head1 AUTHOR
+
+Mike Eldridge <diz@cpan.org>
+
+I am merely the current maintainer; however, the AUTHOR heading is traditional.
+
+=head1 CONTRIBUTORS
+
+=over 2
+
+=item * Mario Domgoergen <mdom@cpan.org>
+
+=item * Tom Insam <tom@jerakeen.org>
+
+=back
 
 =head1 CREDITS
 
@@ -618,12 +616,18 @@ then felt compelled to go implement. Shout.pm owes its existence to #2lmc.
 
 =head1 SEE ALSO
 
-POE
+=over 2
 
-L<POE::Component::IRC>
+=item * L<POE>
 
-L<Bot::BasicBot>
+=item * L<POE::Component::IRC>
 
-Infobot: http://www.infobot.org/
+=item * L<Bot::BasicBot>
 
-Mozbot: http://www.mozilla.org/projects/mozbot/
+=item * Infobot: http://www.infobot.org/
+
+=item * Mozbot: http://www.mozilla.org/projects/mozbot/
+
+=back
+
+=cut

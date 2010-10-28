@@ -1,8 +1,14 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
+0.89 2010/10/28
+
+  - Added DBD::SQLite and YAML::XS to the test dependency list
+  - Quote table identifiers in Bot::BasicBot::Pluggable::Store::DBI
+  - Bot::BasicBot::Pluggable is under new maintenance \o/
+
 0.88 2010/08/29
 
-  Removing build depencies for Test::Perl::Critic and Test::Tidy.
+  Removing build dependencies for Test::Perl::Critic and Test::Tidy.
 
   Bot::BasicBot::Pluggable is looking for a new maintainer  (again...)
   as the current maintainer is not using it anymore. Please mail
@@ -10,7 +16,7 @@ Revision history for Perl extension Bot::BasicBot::Pluggable.
   module.
 
 0.87 2010/05/09
-  
+
   Remove all recommends due some failing tests. In a future release,
   some of the modules with long dependencies will be removed from
   this distribution and form their own on CPAN. I look at you DBI...
@@ -23,11 +29,11 @@ Revision history for Perl extension Bot::BasicBot::Pluggable.
 
     Join: Check for auth after checking whether we should handle
     the message at
-    
+
     Add a new check to Bot::BasicBot::Pluggable::Module::Join to see whether
     the module should handle the message at all, and move the "is the user
     authed" after this check.
-    
+
     By doing this we no longer send out "Sorry, ..." messages if someone
     happens to say "botname: Hi there!" without being authorized.
 
@@ -37,7 +43,7 @@ Revision history for Perl extension Bot::BasicBot::Pluggable.
   changes via Github. Thanks!
 
   - Join: Don't accept commands to join/part channels unless the
-    user asking us to do so is auth'd to the bot 
+    user asking us to do so is auth'd to the bot
   - ChanOp: Make the ChanOp module actually work (uhm...)
 
 0.84 2009/12/11
@@ -69,7 +75,7 @@ Revision history for Perl extension Bot::BasicBot::Pluggable.
   - Auth: Added allow_anonymous as requested and implemented by
     Toni Spets. Setting this value to true, does basically disable
     authentication for all modules, that are not explicitly checking
-    for the users authentication level. 
+    for the users authentication level.
 
     You only ever want to set this value to true, if you want to
     develop modules that need to prefix commands with ! for
@@ -119,7 +125,7 @@ Revision history for Perl extension Bot::BasicBot::Pluggable.
     I'm just using the memory backend again.
 
 0.81 2009/08/30
- 
+
   - redfined logic of --store option
 
     Although i added a store option in the last version of the
@@ -136,7 +142,7 @@ Revision history for Perl extension Bot::BasicBot::Pluggable.
 0.80 2009/08/15
 
   - new command line bot
-    
+
     big rewrite of the command line bot with the help of MooseX::Getopt
     and MooseX::SimpleConfig. It should be possible to call a lot of
     aspects of the pluggable infrastructure without writing perl code.
@@ -156,10 +162,10 @@ Revision history for Perl extension Bot::BasicBot::Pluggable.
   - Seen:
     - now also reckognize joins and parts
   - Infobot:
-    - there's an user defineable http_timeout variabe that defaults to ten 
-      seconds (fixes #3239) 
-    - settable limit on how many RSS items to return 
-    - just shorten entries when @entries is bigger than user_max_entries 
+    - there's an user defineable http_timeout variabe that defaults to ten
+      seconds (fixes #3239)
+    - settable limit on how many RSS items to return
+    - just shorten entries when @entries is bigger than user_max_entries
   - Vars:
     - checking the definedness of $value so you can set a variable to 0 for example
 
@@ -186,7 +192,7 @@ Revision history for Perl extension Bot::BasicBot::Pluggable.
 0.72 2009/06/04
 
   - Fixed absolute path in t/infobot.t ... stupid!
-  - Added me (Mario) to the author list 
+  - Added me (Mario) to the author list
   - Added the git repository to the meta resources
 
 0.71 2009/06/01
@@ -195,7 +201,7 @@ Revision history for Perl extension Bot::BasicBot::Pluggable.
   - Better error message for unparsable rss feeds in Infobot
   - Added ignore_re option to Title (by osfameron)
   - Adjusting documentation for Load to refer to the real behaviour
- 
+
 0.7 2009/03/10
   - Missing t/FakeBot.pm added to MANIFEST
   - Adjusted number of tests for Test::More
@@ -213,7 +219,7 @@ small thing that never changes, and have started to really dislike programming
 in perl recently. Thus I'm just going to release trunk as-is. It's got a lot
 of changes. Things might break. Sorry. I dislike other people doing this,
 and I dislike _me_ doing this, but I see very few other options at this point.
- 
+
 I'm putting all the code in a github repository at
 
 http://github.com/jerakeen/bot-basicbot-pluggable
@@ -259,7 +265,7 @@ You can chastise him for his ego at http://disobey.com/.
     - Removed the check for the existence of $value on a !set. This
       check would fail whenever anyone tried to set the $value to 0,
       which makes perfect sense when you're trying to turn off a boolean'd
-      feature. !unset doesn't work because that entirely deletes the 
+      feature. !unset doesn't work because that entirely deletes the
       $variable, which means it'll be reset to the default the next
       time the module is reloaded or the bot is restarted.
   - Revised documentation for Store.pm and Store/* modules.
@@ -295,7 +301,7 @@ You can chastise him for his ego at http://disobey.com/.
   - Utterly changed the Infobot back-end store system. Updating it will be
     a pain, I'm sorry, but the last one really sucked. Re-wrote the Infobot
     module to be _readable_, or at least slightly less nasty than before.
-    
+
 0.30
   - Improved docs.
   - Synced version number with Bot::BasicBot again.
@@ -327,7 +333,7 @@ You can chastise him for his ego at http://disobey.com/.
     - Spell: Fixed a spelling mistake.
     - Infobot: Fixed annoying parser bugs. Needs to re-write whole thing soon.
     - Karma: Removed case-sensitivity in karma objects.
- 
+
 0.05 2003/06/09
   - Better documentation.
   - Vars changable through better interface.

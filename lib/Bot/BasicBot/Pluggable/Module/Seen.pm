@@ -121,10 +121,6 @@ __END__
 
 Bot::BasicBot::Pluggable::Module::Seen - track when and where people were seen
 
-=head1 VERSION
-
-version 0.88
-
 =head1 IRC USAGE
 
 =over 4

@@ -1,7 +1,4 @@
 package Bot::BasicBot::Pluggable::Module::Karma;
-BEGIN {
-  $Bot::BasicBot::Pluggable::Module::Karma::VERSION = '0.88';
-}
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
 use strict;
@@ -217,10 +214,6 @@ __END__
 =head1 NAME
 
 Bot::BasicBot::Pluggable::Module::Karma - tracks karma for various concepts
-
-=head1 VERSION
-
-version 0.88
 
 =head1 IRC USAGE
 

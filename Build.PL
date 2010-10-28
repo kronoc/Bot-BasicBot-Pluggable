@@ -7,9 +7,11 @@ use Module::Build 0.3601;
 
 my %module_build_args = (
   'build_requires' => {
+    'DBD::SQLite' => '0',
     'FindBin' => '0',
     'Module::Build' => '0.3601',
-    'Test::More' => '0'
+    'Test::More' => '0',
+    'YAML::XS' => '0'
   },
   'configure_requires' => {
     'ExtUtils::MakeMaker' => '6.31',
@@ -20,7 +22,7 @@ my %module_build_args = (
     'Mario Domgoergen <mdom@cpan.org>'
   ],
   'dist_name' => 'Bot-BasicBot-Pluggable',
-  'dist_version' => '0.88',
+  'dist_version' => '0.89',
   'license' => 'perl',
   'module_name' => 'Bot::BasicBot::Pluggable',
   'recommends' => {},

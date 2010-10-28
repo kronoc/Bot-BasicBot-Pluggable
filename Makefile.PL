@@ -12,9 +12,11 @@ my %WriteMakefileArgs = (
   'ABSTRACT' => 'extended simple IRC bot for pluggable modules',
   'AUTHOR' => 'Mario Domgoergen <mdom@cpan.org>',
   'BUILD_REQUIRES' => {
+    'DBD::SQLite' => '0',
     'FindBin' => '0',
     'Module::Build' => '0.3601',
-    'Test::More' => '0'
+    'Test::More' => '0',
+    'YAML::XS' => '0'
   },
   'CONFIGURE_REQUIRES' => {
     'ExtUtils::MakeMaker' => '6.31',
@@ -61,7 +63,7 @@ my %WriteMakefileArgs = (
     'URI::Title' => '0',
     'XML::Feed' => '0'
   },
-  'VERSION' => '0.88',
+  'VERSION' => '0.89',
   'test' => {
     'TESTS' => 't/*.t'
   }
