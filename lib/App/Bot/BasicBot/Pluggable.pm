@@ -1,4 +1,7 @@
 package App::Bot::BasicBot::Pluggable;
+BEGIN {
+  $App::Bot::BasicBot::Pluggable::VERSION = '0.90';
+}
 use Moose;
 use Config::Find;
 use Bot::BasicBot::Pluggable;
@@ -175,6 +178,10 @@ __END__
 
 App::Bot::BasicBot::Pluggable - Base class for bot applications
 
+=head1 VERSION
+
+version 0.90
+
 =head1 SYNOPSIS
 
   my bot = App::Bot::BasicBot::Pluggable( modules => [ 'Karma' ] )
@@ -215,7 +222,7 @@ of L<bot-basicbot-pluggable>. Just replace all dashes with underscores.
 
 =item module
 
-=back 4
+=back
 
 =head1 METHODS
 

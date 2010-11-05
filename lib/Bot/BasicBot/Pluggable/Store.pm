@@ -1,4 +1,7 @@
 package Bot::BasicBot::Pluggable::Store;
+BEGIN {
+  $Bot::BasicBot::Pluggable::Store::VERSION = '0.90';
+}
 use strict;
 use warnings;
 use Carp qw( croak );
@@ -157,6 +160,10 @@ __END__
 =head1 NAME
 
 Bot::BasicBot::Pluggable::Store - base class for the back-end pluggable store
+
+=head1 VERSION
+
+version 0.90
 
 =head1 SYNOPSIS
 

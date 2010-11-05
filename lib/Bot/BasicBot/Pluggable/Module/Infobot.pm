@@ -1,4 +1,7 @@
 package Bot::BasicBot::Pluggable::Module::Infobot;
+BEGIN {
+  $Bot::BasicBot::Pluggable::Module::Infobot::VERSION = '0.90';
+}
 use strict;
 use warnings;
 use base qw(Bot::BasicBot::Pluggable::Module);
@@ -453,6 +456,10 @@ __END__
 =head1 NAME
 
 Bot::BasicBot::Pluggable::Module::Infobot - infobot clone redone in B::B::P.
+
+=head1 VERSION
+
+version 0.90
 
 =head1 SYNOPSIS
 

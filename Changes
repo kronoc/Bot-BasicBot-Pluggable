@@ -1,6 +1,11 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
-0.89 2010/10/28
+0.90 - Fri Nov  5 17:14:30 CDT 2010
+
+ - bumped dependency on Log::Log4perl from 0 to 1.11 due to dependency
+   on the trace log level (RT #56540)
+
+0.89 - Thu Oct 28 18:09:18 CDT 2010
 
   - Added DBD::SQLite and YAML::XS to the test dependency list
   - Quote table identifiers in Bot::BasicBot::Pluggable::Store::DBI

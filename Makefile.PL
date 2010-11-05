@@ -45,7 +45,7 @@ my %WriteMakefileArgs = (
     'File::Temp' => '0',
     'LWP::UserAgent' => '0',
     'List::MoreUtils' => '0',
-    'Log::Log4perl' => '0',
+    'Log::Log4perl' => '1.11',
     'Log::Log4perl::Level' => '0',
     'Module::Load' => '0',
     'Module::Pluggable' => '0',
@@ -63,7 +63,7 @@ my %WriteMakefileArgs = (
     'URI::Title' => '0',
     'XML::Feed' => '0'
   },
-  'VERSION' => '0.89',
+  'VERSION' => '0.90',
   'test' => {
     'TESTS' => 't/*.t'
   }

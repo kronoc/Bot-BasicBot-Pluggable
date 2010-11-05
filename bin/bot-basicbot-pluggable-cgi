@@ -5,6 +5,10 @@ use lib qw(lib);
 
 bot-basicbot-pluggable.pl - A standard Bot::BasicBot::Pluggable script
 
+=head1 VERSION
+
+version 0.90
+
 =head1 DESCRIPTION
 
 A standard Bot::BasicBot::Pluggable interface. You can /query the bot to
@@ -85,6 +89,9 @@ $tt->process(\$template, $vars) || die $tt->error(), "\n";
 
 
 package Bot::BasicBot::Pluggable::CLI;
+BEGIN {
+  $Bot::BasicBot::Pluggable::CLI::VERSION = '0.90';
+}
 use base qw(Bot::BasicBot::Pluggable);
 
 sub reply {
@@ -96,6 +103,9 @@ sub reply {
 }
 
 package main;
+BEGIN {
+  $main::VERSION = '0.90';
+}
 
 __DATA__
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -142,4 +152,3 @@ You: <input type="text" name="q" />&nbsp;<input type="submit" name="submit" valu
 
 </body>
 </html>
-

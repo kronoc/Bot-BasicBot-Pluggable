@@ -14,6 +14,10 @@ __END__
 
 bot-basicbot-pluggable - A standard Bot::BasicBot::Pluggable script
 
+=head1 VERSION
+
+version 0.90
+
 =head1 DESCRIPTION
 
 This script acts as standard interface for Bot::BasicBot::Pluggable,

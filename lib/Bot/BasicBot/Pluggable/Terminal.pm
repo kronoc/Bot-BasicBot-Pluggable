@@ -1,4 +1,7 @@
 package Bot::BasicBot::Pluggable::Terminal;
+BEGIN {
+  $Bot::BasicBot::Pluggable::Terminal::VERSION = '0.90';
+}
 use warnings;
 use strict;
 use base qw(Test::Bot::BasicBot::Pluggable);
@@ -28,6 +31,10 @@ __END__
 =head1 NAME
 
 bot-basicbot-pluggable.pl - A standard Bot::BasicBot::Pluggable script
+
+=head1 VERSION
+
+version 0.90
 
 =head1 DESCRIPTION
 

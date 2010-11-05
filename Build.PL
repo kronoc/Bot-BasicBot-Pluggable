@@ -22,7 +22,7 @@ my %module_build_args = (
     'Mario Domgoergen <mdom@cpan.org>'
   ],
   'dist_name' => 'Bot-BasicBot-Pluggable',
-  'dist_version' => '0.89',
+  'dist_version' => '0.90',
   'license' => 'perl',
   'module_name' => 'Bot::BasicBot::Pluggable',
   'recommends' => {},
@@ -40,7 +40,7 @@ my %module_build_args = (
     'File::Temp' => '0',
     'LWP::UserAgent' => '0',
     'List::MoreUtils' => '0',
-    'Log::Log4perl' => '0',
+    'Log::Log4perl' => '1.11',
     'Log::Log4perl::Level' => '0',
     'Module::Load' => '0',
     'Module::Pluggable' => '0',

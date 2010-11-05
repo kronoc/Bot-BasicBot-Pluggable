@@ -1,4 +1,7 @@
 package Bot::BasicBot::Pluggable;
+BEGIN {
+  $Bot::BasicBot::Pluggable::VERSION = '0.90';
+}
 use warnings;
 use strict;
 
@@ -363,6 +366,10 @@ __END__
 =head1 NAME
 
 Bot::BasicBot::Pluggable - extended simple IRC bot for pluggable modules
+
+=head1 VERSION
+
+version 0.90
 
 =head1 SYNOPSIS
 

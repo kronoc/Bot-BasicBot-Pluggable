@@ -62,4 +62,6 @@ t/configfiles/empty.yaml
 t/modules/Foo.pm
 t/modules/modules/Bar.pm
 t/perlcriticrc
+t/release-pod-coverage.t
+t/release-pod-syntax.t
 t/test.rss
