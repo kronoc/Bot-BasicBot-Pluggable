@@ -37,6 +37,7 @@ my %WriteMakefileArgs = (
     'CGI' => '0',
     'Carp' => '0',
     'Config::Find' => '0',
+    'Crypt::SaltedHash' => '0',
     'DBI' => '0',
     'DBM::Deep' => '0',
     'Data::Dumper' => '0',
@@ -63,7 +64,7 @@ my %WriteMakefileArgs = (
     'URI::Title' => '0',
     'XML::Feed' => '0'
   },
-  'VERSION' => '0.90',
+  'VERSION' => '0.91',
   'test' => {
     'TESTS' => 't/*.t'
   }

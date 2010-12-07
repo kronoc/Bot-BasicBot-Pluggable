@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Store::Deep;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Store::Deep::VERSION = '0.90';
+  $Bot::BasicBot::Pluggable::Store::Deep::VERSION = '0.91';
 }
 use warnings;
 use strict;
@@ -57,7 +57,7 @@ Bot::BasicBot::Pluggable::Store::Deep - use DBM::Deep to provide a storage backe
 
 =head1 VERSION
 
-version 0.90
+version 0.91
 
 =head1 SYNOPSIS
 

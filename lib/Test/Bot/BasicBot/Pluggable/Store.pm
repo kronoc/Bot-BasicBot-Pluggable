@@ -1,6 +1,6 @@
 package Test::Bot::BasicBot::Pluggable::Store;
 BEGIN {
-  $Test::Bot::BasicBot::Pluggable::Store::VERSION = '0.90';
+  $Test::Bot::BasicBot::Pluggable::Store::VERSION = '0.91';
 }
 use base qw(Test::Builder::Module);
 use strict;
@@ -47,7 +47,7 @@ Test::Bot::BasicBot::Pluggable::Store - basics tests for Bot::BasicBot::Pluggabl
 
 =head1 VERSION
 
-version 0.90
+version 0.91
 
 =head1 SYNOPSIS
 

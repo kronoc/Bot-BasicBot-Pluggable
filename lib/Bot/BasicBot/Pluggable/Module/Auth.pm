@@ -1,10 +1,11 @@
 package Bot::BasicBot::Pluggable::Module::Auth;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::Auth::VERSION = '0.90';
+  $Bot::BasicBot::Pluggable::Module::Auth::VERSION = '0.91';
 }
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
 use strict;
+use Crypt::SaltedHash;
 
 sub init {
     my $self = shift;
@@ -41,7 +42,7 @@ sub admin {
         my ( $user, $pass ) = ( $1, $2 );
         my $stored = $self->get( "password_" . $user );
 
-        if ( $pass and $stored and $pass eq $stored ) {
+        if ( _check_password($pass, $stored) ) {
             $self->{auth}{ $mess->{who} }{time}     = time();
             $self->{auth}{ $mess->{who} }{username} = $user;
             if ( $user eq "admin" and $pass eq "julia" ) {
@@ -62,7 +63,7 @@ sub admin {
     elsif ( $body =~ /^!adduser\s+(\w+)\s+(\w+)/ ) {
         my ( $user, $pass ) = ( $1, $2 );
         if ( $self->authed( $mess->{who} ) ) {
-            $self->set( "password_" . $user, $pass );
+            $self->set( "password_" . $user, _hash_password($pass) );
             return "Added user $user.";
         }
         else {
@@ -91,8 +92,8 @@ sub admin {
         my ( $old_pass, $pass ) = ( $1, $2 );
         if ( $self->authed( $mess->{who} ) ) {
             my $username = $self->{auth}{ $mess->{who} }{username};
-            if ( $old_pass eq $self->get("password_$username") ) {
-                $self->set( "password_$username", $pass );
+            if (_check_password($old_pass, $self->get("password_$username")) ) {
+                $self->set( "password_$username", _hash_password($pass) );
                 return "Changed password to $pass.";
             }
             else {
@@ -129,8 +130,27 @@ sub authed {
     return 0;
 }
 
-1;
+# Given a password provided by the user and the password stored in the database,
+# see if they match.  Older versions stored plaintext passwords, newer versions
+# use salted hashed passwords.
+sub _check_password {
+    my ($entered_pw, $stored_pw) = @_;
+    if ($stored_pw =~ /^\{SSHA\}/) {
+        return Crypt::SaltedHash->validate($stored_pw, $entered_pw);
+    } else {
+        return $entered_pw eq $stored_pw;
+    }
+}
 
+# Given a plain-text password, return a salted hashed version to store
+sub _hash_password {
+    my $plain_pw = shift;
+    my $csh = Crypt::SaltedHash->new(algorithm => 'SHA-1');
+    $csh->add($plain_pw);
+    return $csh->generate;
+}
+
+1;
 __END__
 
 =head1 NAME
@@ -139,7 +159,7 @@ Bot::BasicBot::Pluggable::Module::Auth - authentication for Bot::BasicBot::Plugg
 
 =head1 VERSION
 
-version 0.90
+version 0.91
 
 =head1 SYNOPSIS
 

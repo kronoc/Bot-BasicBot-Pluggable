@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Store::DBI;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Store::DBI::VERSION = '0.90';
+  $Bot::BasicBot::Pluggable::Store::DBI::VERSION = '0.91';
 }
 use warnings;
 use strict;
@@ -175,7 +175,7 @@ Bot::BasicBot::Pluggable::Store::DBI - use DBI to provide a storage backend
 
 =head1 VERSION
 
-version 0.90
+version 0.91
 
 =head1 SYNOPSIS
 

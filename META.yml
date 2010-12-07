@@ -23,6 +23,7 @@ requires:
   CGI: 0
   Carp: 0
   Config::Find: 0
+  Crypt::SaltedHash: 0
   DBI: 0
   DBM::Deep: 0
   Data::Dumper: 0
@@ -49,4 +50,4 @@ requires:
   URI::Title: 0
   XML::Feed: 0
   perl: 5.8.0
-version: 0.90
+version: 0.91

@@ -22,7 +22,7 @@ my %module_build_args = (
     'Mario Domgoergen <mdom@cpan.org>'
   ],
   'dist_name' => 'Bot-BasicBot-Pluggable',
-  'dist_version' => '0.90',
+  'dist_version' => '0.91',
   'license' => 'perl',
   'module_name' => 'Bot::BasicBot::Pluggable',
   'recommends' => {},
@@ -32,6 +32,7 @@ my %module_build_args = (
     'CGI' => '0',
     'Carp' => '0',
     'Config::Find' => '0',
+    'Crypt::SaltedHash' => '0',
     'DBI' => '0',
     'DBM::Deep' => '0',
     'Data::Dumper' => '0',
