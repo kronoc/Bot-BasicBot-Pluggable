@@ -14,7 +14,7 @@ my %module_build_args = (
     'YAML::XS' => '0'
   },
   'configure_requires' => {
-    'ExtUtils::MakeMaker' => '6.31',
+    'ExtUtils::MakeMaker' => '6.30',
     'Module::Build' => '0.3601'
   },
   'dist_abstract' => 'extended simple IRC bot for pluggable modules',
@@ -22,7 +22,7 @@ my %module_build_args = (
     'Mario Domgoergen <mdom@cpan.org>'
   ],
   'dist_name' => 'Bot-BasicBot-Pluggable',
-  'dist_version' => '0.91',
+  'dist_version' => '0.92',
   'license' => 'perl',
   'module_name' => 'Bot::BasicBot::Pluggable',
   'recommends' => {},
@@ -32,7 +32,7 @@ my %module_build_args = (
     'CGI' => '0',
     'Carp' => '0',
     'Config::Find' => '0',
-    'Crypt::SaltedHash' => '0',
+    'Crypt::SaltedHash' => '0.06',
     'DBI' => '0',
     'DBM::Deep' => '0',
     'Data::Dumper' => '0',

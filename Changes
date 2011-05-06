@@ -1,5 +1,12 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
+0.92 - Thu May  5 08:39:08 CDT 2011
+ - added ability to load modules of arbitrary depth, courtesy of david
+   precious (bigpresh)
+ - refactor Auth module so that it doesn't step on other modules by
+   eating all bang commands, also courtesy of bigpresh.
+ - added Crypt::SaltedHash to the prereqs list
+
 0.91 - Tue Dec  7 00:05:51 CST 2010
  - added transparent support for salted password hashes (RT #63232),
    courtesy of david precious (bigpresh)

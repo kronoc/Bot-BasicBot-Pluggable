@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Store::Storable;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Store::Storable::VERSION = '0.91';
+  $Bot::BasicBot::Pluggable::Store::Storable::VERSION = '0.92';
 }
 use warnings;
 use strict;
@@ -50,7 +50,7 @@ Bot::BasicBot::Pluggable::Store::Storable - use Storable to provide a storage ba
 
 =head1 VERSION
 
-version 0.91
+version 0.92
 
 =head1 SYNOPSIS
 

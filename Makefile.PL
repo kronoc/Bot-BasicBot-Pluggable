@@ -4,7 +4,7 @@ use warnings;
 
 BEGIN { require 5.8.0; }
 
-use ExtUtils::MakeMaker 6.31;
+use ExtUtils::MakeMaker 6.30;
 
 
 
@@ -19,7 +19,7 @@ my %WriteMakefileArgs = (
     'YAML::XS' => '0'
   },
   'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.31',
+    'ExtUtils::MakeMaker' => '6.30',
     'Module::Build' => '0.3601'
   },
   'DISTNAME' => 'Bot-BasicBot-Pluggable',
@@ -37,7 +37,7 @@ my %WriteMakefileArgs = (
     'CGI' => '0',
     'Carp' => '0',
     'Config::Find' => '0',
-    'Crypt::SaltedHash' => '0',
+    'Crypt::SaltedHash' => '0.06',
     'DBI' => '0',
     'DBM::Deep' => '0',
     'Data::Dumper' => '0',
@@ -64,7 +64,7 @@ my %WriteMakefileArgs = (
     'URI::Title' => '0',
     'XML::Feed' => '0'
   },
-  'VERSION' => '0.91',
+  'VERSION' => '0.92',
   'test' => {
     'TESTS' => 't/*.t'
   }

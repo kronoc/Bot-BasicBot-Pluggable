@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable;
 BEGIN {
-  $Bot::BasicBot::Pluggable::VERSION = '0.91';
+  $Bot::BasicBot::Pluggable::VERSION = '0.92';
 }
 use warnings;
 use strict;
@@ -92,15 +92,18 @@ sub load {
     my $logger = Log::Log4perl->get_logger( ref $self );
 
     # it's safe to die here, mostly this call is eval'd.
-    $logger->logdie("Cannot load module with a name") unless $module;
+    $logger->logdie("Cannot load module without a name") unless $module;
     $logger->logdie("Module $module already loaded") if $self->handler($module);
 
     # This is possible a leeeetle bit evil.
     $logger->info("Loading module $module");
-    my $file = "Bot/BasicBot/Pluggable/Module/$module.pm";
-    $file = "./$module.pm"         if ( -e "./$module.pm" );
-    $file = "./modules/$module.pm" if ( -e "./modules/$module.pm" );
+    my $filename = $module;
+    $filename =~ s{::}{/}g;
+    my $file = "Bot/BasicBot/Pluggable/Module/$filename.pm";
+    $file = "./$filename.pm"         if ( -e "./$filename.pm" );
+    $file = "./modules/$filename.pm" if ( -e "./modules/$filename.pm" );
     $logger->debug("Loading module $module from file $file");
+    warn "Loading $module from $file";
 
     # force a reload of the file (in the event that we've already loaded it).
     no warnings 'redefine';
@@ -369,7 +372,7 @@ Bot::BasicBot::Pluggable - extended simple IRC bot for pluggable modules
 
 =head1 VERSION
 
-version 0.91
+version 0.92
 
 =head1 SYNOPSIS
 
