@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Store::Storable;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Store::Storable::VERSION = '0.92';
+  $Bot::BasicBot::Pluggable::Store::Storable::VERSION = '0.93';
 }
 use warnings;
 use strict;
@@ -24,18 +24,18 @@ sub save {
 
     for my $name (@modules) {
         my $filename = File::Spec->catfile( $self->{dir}, $name . ".storable" );
-        my ( $fh, $tempfile ) = tempfile( UNLINK => 0 );
+        my ( $fh, $tempfile ) = tempfile( DIR => $self->{dir}, UNLINK => 0 );
         nstore( $self->{store}{$name}, $tempfile )
           or die "Cannot save to $tempfile\n";
         rename $tempfile, $filename
-          or die "Cannot create $filename\n";
+          or die "Cannot create $filename: $!\n";
     }
 }
 
 sub load {
     my $self = shift;
     for my $file ( glob File::Spec->catfile( $self->{dir}, '*.storable' ) ) {
-        my ($name) = $file =~ /^(.*?)\.storable$/;
+        my (undef, undef, $name) = map {File::Spec->splitpath($_)} $file =~ /^(.*?)\.storable$/;
         $self->{store}{$name} = retrieve($file);
     }
 }
@@ -50,7 +50,7 @@ Bot::BasicBot::Pluggable::Store::Storable - use Storable to provide a storage ba
 
 =head1 VERSION
 
-version 0.92
+version 0.93
 
 =head1 SYNOPSIS
 

@@ -1,5 +1,14 @@
 Revision history for Perl extension Bot::BasicBot::Pluggable.
 
+0.93 - Mon Jun 27 10:40:24 CDT 2011
+ - when creating temporary files for Store::Storable->save, make sure
+   they are created in the same directory that the final file will be
+   moved to.  if not, the rename may fail if the source and destination
+   are on separate filesystems.  (RT #68886)
+ - correctly parse relative paths from *.storable file globbing in the
+   Storable backend store.  this was preventing the store from restoring
+   data for modules.  (RT #68887)
+
 0.92 - Thu May  5 08:39:08 CDT 2011
  - added ability to load modules of arbitrary depth, courtesy of david
    precious (bigpresh)

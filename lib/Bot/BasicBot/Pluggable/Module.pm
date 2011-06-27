@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::VERSION = '0.92';
+  $Bot::BasicBot::Pluggable::Module::VERSION = '0.93';
 }
 use warnings;
 use strict;
@@ -139,7 +139,7 @@ Bot::BasicBot::Pluggable::Module - base module for all BasicBot plugins
 
 =head1 VERSION
 
-version 0.92
+version 0.93
 
 =head1 SYNOPSIS
 

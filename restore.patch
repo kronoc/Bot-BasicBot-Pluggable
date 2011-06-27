@@ -1,0 +1,9 @@
+@@ -35,7 +35,7 @@
+ sub load {
+     my $self = shift;
+     for my $file ( glob File::Spec->catfile( $self->{dir}, '*.storable' ) ) {
+-        my (undef, undef, $name) = map {File::Spec->splitpath($_)} $file =~ /^(.*?)\.storable$/;
++        my ($name) = $file =~ /^(.*?)\.storable$/;
+         $self->{store}{$name} = retrieve($file);
+     }
+ }
