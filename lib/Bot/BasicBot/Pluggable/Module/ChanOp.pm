@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::ChanOp;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::ChanOp::VERSION = '0.94';
+  $Bot::BasicBot::Pluggable::Module::ChanOp::VERSION = '0.95';
 }
 use base 'Bot::BasicBot::Pluggable::Module';
 use strict;
@@ -137,7 +137,7 @@ Bot::BasicBot::Pluggable::Module::ChanOp - Channel operator
 
 =head1 VERSION
 
-version 0.94
+version 0.95
 
 =head1 SYNOPSIS
 

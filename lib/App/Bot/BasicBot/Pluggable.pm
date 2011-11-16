@@ -1,6 +1,6 @@
 package App::Bot::BasicBot::Pluggable;
 BEGIN {
-  $App::Bot::BasicBot::Pluggable::VERSION = '0.94';
+  $App::Bot::BasicBot::Pluggable::VERSION = '0.95';
 }
 use Moose;
 use Config::Find;
@@ -77,7 +77,7 @@ has logconfig => ( is => 'rw', isa => 'Str' );
 
 has configfile => (
     is      => 'rw',
-    isa     => 'Str',
+    isa     => 'Str|Undef',
     default => Config::Find->find( name => 'bot-basicbot-pluggable.yaml' ),
 );
 
@@ -180,7 +180,7 @@ App::Bot::BasicBot::Pluggable - Base class for bot applications
 
 =head1 VERSION
 
-version 0.94
+version 0.95
 
 =head1 SYNOPSIS
 

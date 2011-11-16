@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::Auth;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::Auth::VERSION = '0.94';
+  $Bot::BasicBot::Pluggable::Module::Auth::VERSION = '0.95';
 }
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -169,7 +169,7 @@ Bot::BasicBot::Pluggable::Module::Auth - authentication for Bot::BasicBot::Plugg
 
 =head1 VERSION
 
-version 0.94
+version 0.95
 
 =head1 SYNOPSIS
 

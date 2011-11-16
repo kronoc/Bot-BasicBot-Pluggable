@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable;
 BEGIN {
-  $Bot::BasicBot::Pluggable::VERSION = '0.94';
+  $Bot::BasicBot::Pluggable::VERSION = '0.95';
 }
 use warnings;
 use strict;
@@ -212,7 +212,7 @@ sub store {
 sub loglevel {
     my $self = shift;
     $self->{loglevel} = shift if @_;
-    return uc $self->{loglevel} || 'WARN';
+    return ($self->{loglevel} and uc $self->{loglevel}) || 'WARN';
 }
 
 sub logconfig {
@@ -372,7 +372,7 @@ Bot::BasicBot::Pluggable - extended simple IRC bot for pluggable modules
 
 =head1 VERSION
 
-version 0.94
+version 0.95
 
 =head1 SYNOPSIS
 
