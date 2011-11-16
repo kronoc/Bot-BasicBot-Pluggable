@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::Karma;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::Karma::VERSION = '0.93';
+  $Bot::BasicBot::Pluggable::Module::Karma::VERSION = '0.94';
 }
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -23,72 +23,55 @@ sub help {
 "Gives karma for or against a particular thing. Usage: <thing>++ # comment, <thing>-- # comment, karma <thing>, explain <thing>.";
 }
 
-sub seen {
-    my ( $self, $mess ) = @_;
-    my $body = $mess->{body};
-    return 0 unless defined $body;
-    my ( $command, $param ) = split( /\s+/, $body, 2 );
-    $command = lc($command);
-
-    if (   ( $body =~ /(\w+)\+\+\s*#?\s*/ )
-        or ( $body =~ /\(([\w\s]+)\)\+\+\s*#?\s*/ ) )
-    {
-        return
-          if ( ( $1 eq $mess->{who} ) and $self->get("user_ignore_selfkarma") );
-        return $self->add_karma( $1, 1, $', $mess->{who} );
-    }
-    elsif (( $body =~ /(\w+)\-\-\s*#?\s*/ )
-        or ( $body =~ /\(([\w\s]+)\)\-\-\s*#?\s*/ ) )
-    {
-        return
-          if ( ( $1 eq $mess->{who} ) and $self->get("user_ignore_selfkarma") );
-        return $self->add_karma( $1, 0, $', $mess->{who} );
-    }
-    elsif ( $mess->{address} && ( $body =~ /\+\+\s*#?\s*/ ) ) {
-        return $self->add_karma( $mess->{address}, 1, $', $mess->{who} );
-
-    # our body check here is constrained to the beginning of the line with
-    # an optional "-" of "--" because Bot::BasicBot sees "<botname>-" as being
-    # an addressing mode (along with "," and ":"). so, "<botname>--" comes
-    # through as "<botname>-" in {address} and "-" as the start of our body.
-    # TODO: add some sort of $mess->{rawbody} to Bot::BasicBot.pm. /me grumbles.
-    }
-    elsif ( $mess->{address} && ( $body =~ /\-?\-\s*#?\s*/ ) ) {
-        return $self->add_karma( $mess->{address}, 0, $', $mess->{who} );
-    }
-}
-
 sub told {
     my ( $self, $mess ) = @_;
     my $body = $mess->{body};
+    return 0 unless defined $body;
 
+    # If someone is trying to change the bot's karma, we'll have our bot nick in
+    # {addressed}, and '++' or '-' in the body ('-' rather than '--' because
+    # Bot::BasicBot removes one of the dashes as it considers it part of the
+    # address)
+    if ( $mess->{address} && ($body eq '++' or $body eq '-') ) {
+        $body = '--' if $body eq '-';
+        $body = $mess->{address} . $body;
+    }
+
+    my $op_re      = qr{ ( \-\- | \+\+ )        }x;
+    my $comment_re = qr{ (?: \s* \# \s* (.+) )? }x;
+    for my $regex (
+        qr{^   (\w+)     $op_re $comment_re  }x, # singleword++
+        qr{^ \( (.+)  \) $op_re $comment_re  }x  # (more words)++
+    ) {
+        if (my($thing, $op, $comment) = $body =~ $regex) {
+            my $add = $op eq '++' ? 1 : 0;
+            if ( 
+                ( $1 eq $mess->{who} ) and $self->get("user_ignore_selfkarma") 
+            ){
+                return;
+            }
+            my $reply = $self->add_karma( $thing, $add, $comment, $mess->{who} );
+            if (lc $thing eq lc $self->bot->nick) {
+                $reply .= ' ' . ($add ? '(thanks!)' : '(pffft)');
+            }
+            return $reply;
+        }
+    }
+
+    # OK, handle "karma" / "explain" commands
     my ( $command, $param ) = split( /\s+/, $body, 2 );
     $command = lc($command);
 
-    my $nick = $self->bot->nick;
-
-    my $tmp = $command;
-    if ( $tmp =~ s!^$nick!! or $nick = $mess->{address} ) {
-        if ( $tmp eq '++' ) {
-            return "Thanks!";
-        }
-        elsif ( $tmp =~ /^--?$/ ) {
-            return "Pbbbbtt!";
-        }
-    }
-
     if ( $command eq "karma" ) {
-        if ($param) {
-            return "$param has karma of " . $self->get_karma($param) . ".";
+		$param =~ s/\?+$//; # handle interrogatives - lop off trailing question marks
+        if ($param eq 'chameleon') {
+            return "Karma karma karma karma karma chameleon, "
+                . "you come and go, you come and go...";
         }
-        else {
-            return
-                $mess->{who}
-              . " has karma of "
-              . $self->get_karma( $mess->{who} ) . ".";
-        }
-    }
-    elsif ( $command eq "explain" and $param ) {
+        $param ||= $mess->{who};
+        return "$param has karma of " . $self->get_karma($param) . ".";
+    
+    } elsif ( $command eq "explain" and $param ) {
         $param =~ s/^karma\s+//i;
         my ( $karma, $good, $bad ) = $self->get_karma($param);
         my $reply = "positive: " . $self->format_reasons($good) . "; ";
@@ -98,6 +81,7 @@ sub told {
         return $reply;
     }
 }
+
 
 sub format_reasons {
     my ( $self, $reason ) = @_;
@@ -137,11 +121,11 @@ sub maybe_add_giver {
 }
 
 sub get_karma {
-    my ( $self, $object ) = @_;
-    $object = lc($object);
-    $object =~ s/-/ /g;
+    my ( $self, $thing ) = @_;
+    $thing = lc($thing);
+    $thing =~ s/-/ /g;
 
-    my @changes = @{ $self->get("karma_$object") || [] };
+    my @changes = @{ $self->get("karma_$thing") || [] };
 
     my ( @good, @bad );
     my $karma    = 0;
@@ -172,22 +156,25 @@ sub get_karma {
 }
 
 sub add_karma {
-    my ( $self, $object, $good, $reason, $who ) = @_;
-    $object = lc($object);
-    $object =~ s/-/ /g;
+    my ( $self, $thing, $good, $reason, $who ) = @_;
+    $thing = lc($thing);
+    $thing =~ s/-/ /g;
     my $row =
       { reason => $reason, who => $who, timestamp => time, positive => $good };
-    my @changes = @{ $self->get("karma_$object") || [] };
+    my @changes = @{ $self->get("karma_$thing") || [] };
     push @changes, $row;
-    $self->set( "karma_$object" => \@changes );
-    return 1;
+    $self->set( "karma_$thing" => \@changes );
+    my $respond = $self->get("karma_change_reponse");
+    $respond = 1 if !defined $respond;
+    return $respond ?
+        "Karma for $thing is now " . scalar $self->get_karma($thing) : 1;
 }
 
 sub trim_list {
     my ( $self, $list, $count ) = @_;
 
-    # If radomization isn't requested we just return the reasons
-    # in reversed cronological order
+    # If randomization isn't requested we just return the reasons
+    # in reversed chronological order
 
     if ( $self->get('user_randomize_reasons') ) {
         fisher_yates_shuffle($list);
@@ -220,7 +207,7 @@ Bot::BasicBot::Pluggable::Module::Karma - tracks karma for various concepts
 
 =head1 VERSION
 
-version 0.93
+version 0.94
 
 =head1 IRC USAGE
 
@@ -230,9 +217,15 @@ version 0.93
 
 Increases the karma for <thing>.
 
+Responds with the new karma for <thing> unless C<karma_change_response> is set 
+to a false value.
+
 =item <thing>-- # <comment>
 
 Decreases the karma for <thing>.
+
+Responds with the new karma for <thing> unless C<karma_change_response> is set 
+to a false value.
 
 =item karma <thing>
 
@@ -262,12 +255,12 @@ scalar context or a array of hash reference. Every hash reference
 has entries for the timestamp (timestamp), the giver (who) and the
 explanation string (reason) for its karma action.
 
-=item add_karma($object, $good, $reason, $who)
+=item add_karma($thing, $good, $reason, $who)
 
-Adds or subtracts from the passed C<$object>'s karma. C<$good> is either 1 (to
-add a karma point to the C<$object> or 0 (to subtract). C<$reason> is an 
+Adds or subtracts from the passed C<$thing>'s karma. C<$good> is either 1 (to
+add a karma point to the C<$thing> or 0 (to subtract). C<$reason> is an 
 optional string commenting on the reason for the change, and C<$who> is the
-person modifying the karma of C<$object>. Nothing is returned.
+person modifying the karma of C<$thing>. Nothing is returned.
 
 =back
 
@@ -296,6 +289,13 @@ Defaults to 1; whether to randomize the order of reasons. If set
 to 0, the reasons are sorted in reversed chronological order.
 
 =back
+
+=item karma_change_response
+
+Defaults to 1; whether to show a response when the karma of a
+thing is changed.  If true, the bot will reply with the new karma.
+If set to 0, the bot will silently update the karma, without
+a response.
 
 =head1 AUTHOR
 

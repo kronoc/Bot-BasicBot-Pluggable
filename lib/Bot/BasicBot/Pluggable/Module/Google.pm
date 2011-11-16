@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::Google;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::Google::VERSION = '0.93';
+  $Bot::BasicBot::Pluggable::Module::Google::VERSION = '0.94';
 }
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -77,7 +77,7 @@ Bot::BasicBot::Pluggable::Module::Google - searches Google for terms and spellin
 
 =head1 VERSION
 
-version 0.93
+version 0.94
 
 =head1 IRC USAGE
 

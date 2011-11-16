@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::DNS;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::DNS::VERSION = '0.93';
+  $Bot::BasicBot::Pluggable::Module::DNS::VERSION = '0.94';
 }
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -42,7 +42,7 @@ Bot::BasicBot::Pluggable::Module::DNS - DNS lookups for hostnames or IP addresse
 
 =head1 VERSION
 
-version 0.93
+version 0.94
 
 =head1 IRC USAGE
 

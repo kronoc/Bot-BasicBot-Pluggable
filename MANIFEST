@@ -40,7 +40,6 @@ lib/Bot/BasicBot/Pluggable/Store/Storable.pm
 lib/Bot/BasicBot/Pluggable/Terminal.pm
 lib/Test/Bot/BasicBot/Pluggable.pm
 lib/Test/Bot/BasicBot/Pluggable/Store.pm
-restore.patch
 t/00bootstrap.t
 t/01module_base.t
 t/02module_auth.t

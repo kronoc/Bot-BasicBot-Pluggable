@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::Infobot;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::Infobot::VERSION = '0.93';
+  $Bot::BasicBot::Pluggable::Module::Infobot::VERSION = '0.94';
 }
 use strict;
 use warnings;
@@ -459,7 +459,7 @@ Bot::BasicBot::Pluggable::Module::Infobot - infobot clone redone in B::B::P.
 
 =head1 VERSION
 
-version 0.93
+version 0.94
 
 =head1 SYNOPSIS
 

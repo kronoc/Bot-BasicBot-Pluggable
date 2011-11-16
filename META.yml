@@ -50,4 +50,4 @@ requires:
   URI::Title: 0
   XML::Feed: 0
   perl: 5.8.0
-version: 0.93
+version: 0.94

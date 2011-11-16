@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::VERSION = '0.93';
+  $Bot::BasicBot::Pluggable::Module::VERSION = '0.94';
 }
 use warnings;
 use strict;
@@ -139,7 +139,7 @@ Bot::BasicBot::Pluggable::Module - base module for all BasicBot plugins
 
 =head1 VERSION
 
-version 0.93
+version 0.94
 
 =head1 SYNOPSIS
 
@@ -327,7 +327,7 @@ become the only thing to do, and I will deprecate C<said()>.
 =item replied($message,$reply)
 
 This method is called every time a module returns an reply. The first
-agurment is the original message and the seconds is the returned
+argument is the original message and the second is the returned
 string. The return value of this method is actually discarded, so
 you can't do anything to prevent the message from being sent. This
 is mainly meant to log the bots activity.
@@ -335,6 +335,8 @@ is mainly meant to log the bots activity.
 =item seen($message)
 
 Like C<said()>; called if you don't override C<said()>, but only for priority 0.
+
+As it is called at priority 0, you cannot return a reply from this method.
 
 =item admin($message)
 

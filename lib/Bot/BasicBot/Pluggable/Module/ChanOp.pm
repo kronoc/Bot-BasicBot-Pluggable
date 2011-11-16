@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::ChanOp;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::ChanOp::VERSION = '0.93';
+  $Bot::BasicBot::Pluggable::Module::ChanOp::VERSION = '0.94';
 }
 use base 'Bot::BasicBot::Pluggable::Module';
 use strict;
@@ -22,7 +22,9 @@ sub isop {
     my ( $self, $channel, $who ) = @_;
     return unless $channel;
     $who ||= $self->bot->nick();
-    return $self->bot->channel_data($channel)->{$who}->{op};
+    my $channel_data = $self->bot->channel_data($channel)
+        or return;
+    return $channel_data($channel)->{$who}->{op};
 }
 
 sub deop_op {
@@ -135,7 +137,7 @@ Bot::BasicBot::Pluggable::Module::ChanOp - Channel operator
 
 =head1 VERSION
 
-version 0.93
+version 0.94
 
 =head1 SYNOPSIS
 

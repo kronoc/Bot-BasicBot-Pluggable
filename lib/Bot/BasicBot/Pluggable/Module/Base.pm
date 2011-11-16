@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::Base;
 BEGIN {
-  $Bot::BasicBot::Pluggable::Module::Base::VERSION = '0.93';
+  $Bot::BasicBot::Pluggable::Module::Base::VERSION = '0.94';
 }
 use warnings;
 use strict;

@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable;
 BEGIN {
-  $Bot::BasicBot::Pluggable::VERSION = '0.93';
+  $Bot::BasicBot::Pluggable::VERSION = '0.94';
 }
 use warnings;
 use strict;
@@ -372,7 +372,7 @@ Bot::BasicBot::Pluggable - extended simple IRC bot for pluggable modules
 
 =head1 VERSION
 
-version 0.93
+version 0.94
 
 =head1 SYNOPSIS
 
@@ -604,6 +604,8 @@ I am merely the current maintainer; however, the AUTHOR heading is traditional.
 =item * Mario Domgoergen <mdom@cpan.org>
 
 =item * Tom Insam <tom@jerakeen.org>
+
+=item * David Precious <davidp@preshweb.co.uk>
 
 =back
 
