@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::Karma;
-BEGIN {
-  $Bot::BasicBot::Pluggable::Module::Karma::VERSION = '0.95';
+{
+  $Bot::BasicBot::Pluggable::Module::Karma::VERSION = '0.96';
 }
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -64,7 +64,7 @@ sub told {
 
     if ( $command eq "karma" ) {
 		$param =~ s/\?+$//; # handle interrogatives - lop off trailing question marks
-        if ($param eq 'chameleon') {
+        if ($param && $param eq 'chameleon') {
             return "Karma karma karma karma karma chameleon, "
                 . "you come and go, you come and go...";
         }
@@ -207,7 +207,7 @@ Bot::BasicBot::Pluggable::Module::Karma - tracks karma for various concepts
 
 =head1 VERSION
 
-version 0.95
+version 0.96
 
 =head1 IRC USAGE
 

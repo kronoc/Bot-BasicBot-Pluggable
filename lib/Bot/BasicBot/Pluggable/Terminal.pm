@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Terminal;
-BEGIN {
-  $Bot::BasicBot::Pluggable::Terminal::VERSION = '0.95';
+{
+  $Bot::BasicBot::Pluggable::Terminal::VERSION = '0.96';
 }
 use warnings;
 use strict;
@@ -34,7 +34,7 @@ bot-basicbot-pluggable.pl - A standard Bot::BasicBot::Pluggable script
 
 =head1 VERSION
 
-version 0.95
+version 0.96
 
 =head1 DESCRIPTION
 
