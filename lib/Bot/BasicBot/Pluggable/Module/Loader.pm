@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::Loader;
 {
-  $Bot::BasicBot::Pluggable::Module::Loader::VERSION = '0.96';
+  $Bot::BasicBot::Pluggable::Module::Loader::VERSION = '0.97';
 }
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -79,7 +79,7 @@ Bot::BasicBot::Pluggable::Module::Loader - loads and unloads bot modules; rememb
 
 =head1 VERSION
 
-version 0.96
+version 0.97
 
 =head1 IRC USAGE
 

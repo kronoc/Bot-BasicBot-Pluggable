@@ -22,7 +22,7 @@ my %module_build_args = (
     "Mario Domgoergen <mdom\@cpan.org>"
   ],
   "dist_name" => "Bot-BasicBot-Pluggable",
-  "dist_version" => "0.96",
+  "dist_version" => "0.97",
   "license" => "perl",
   "module_name" => "Bot::BasicBot::Pluggable",
   "recommends" => {},

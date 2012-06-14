@@ -53,4 +53,4 @@ requires:
   perl: 5.8.0
   strict: 0
   warnings: 0
-version: 0.96
+version: 0.97

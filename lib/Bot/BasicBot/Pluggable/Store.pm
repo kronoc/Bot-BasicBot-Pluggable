@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Store;
 {
-  $Bot::BasicBot::Pluggable::Store::VERSION = '0.96';
+  $Bot::BasicBot::Pluggable::Store::VERSION = '0.97';
 }
 use strict;
 use warnings;
@@ -163,7 +163,7 @@ Bot::BasicBot::Pluggable::Store - base class for the back-end pluggable store
 
 =head1 VERSION
 
-version 0.96
+version 0.97
 
 =head1 SYNOPSIS
 

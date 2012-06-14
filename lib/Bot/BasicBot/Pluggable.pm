@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable;
 {
-  $Bot::BasicBot::Pluggable::VERSION = '0.96';
+  $Bot::BasicBot::Pluggable::VERSION = '0.97';
 }
 use warnings;
 use strict;
@@ -372,7 +372,7 @@ Bot::BasicBot::Pluggable - extended simple IRC bot for pluggable modules
 
 =head1 VERSION
 
-version 0.96
+version 0.97
 
 =head1 SYNOPSIS
 
