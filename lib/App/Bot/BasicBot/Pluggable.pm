@@ -1,6 +1,6 @@
 package App::Bot::BasicBot::Pluggable;
 {
-  $App::Bot::BasicBot::Pluggable::VERSION = '0.97';
+  $App::Bot::BasicBot::Pluggable::VERSION = '0.98';
 }
 use Moose;
 use Config::Find;
@@ -180,7 +180,7 @@ App::Bot::BasicBot::Pluggable - Base class for bot applications
 
 =head1 VERSION
 
-version 0.97
+version 0.98
 
 =head1 SYNOPSIS
 

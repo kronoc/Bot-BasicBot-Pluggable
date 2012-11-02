@@ -7,7 +7,7 @@ bot-basicbot-pluggable.pl - A standard Bot::BasicBot::Pluggable script
 
 =head1 VERSION
 
-version 0.97
+version 0.98
 
 =head1 DESCRIPTION
 
@@ -90,7 +90,7 @@ $tt->process(\$template, $vars) || die $tt->error(), "\n";
 
 package Bot::BasicBot::Pluggable::CLI;
 {
-  $Bot::BasicBot::Pluggable::CLI::VERSION = '0.97';
+  $Bot::BasicBot::Pluggable::CLI::VERSION = '0.98';
 }
 use base qw(Bot::BasicBot::Pluggable);
 
@@ -104,7 +104,7 @@ sub reply {
 
 package main;
 {
-  $main::VERSION = '0.97';
+  $main::VERSION = '0.98';
 }
 
 __DATA__

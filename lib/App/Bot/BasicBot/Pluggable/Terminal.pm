@@ -1,6 +1,6 @@
 package App::Bot::BasicBot::Pluggable::Terminal;
 {
-  $App::Bot::BasicBot::Pluggable::Terminal::VERSION = '0.97';
+  $App::Bot::BasicBot::Pluggable::Terminal::VERSION = '0.98';
 }
 
 use Moose;
@@ -19,7 +19,7 @@ App::Bot::BasicBot::Pluggable::Terminal
 
 =head1 VERSION
 
-version 0.97
+version 0.98
 
 =head1 SYNOPSIS
 

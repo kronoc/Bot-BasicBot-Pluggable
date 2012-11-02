@@ -1,6 +1,6 @@
 package Bot::BasicBot::Pluggable::Module::Join;
 {
-  $Bot::BasicBot::Pluggable::Module::Join::VERSION = '0.97';
+  $Bot::BasicBot::Pluggable::Module::Join::VERSION = '0.98';
 }
 use base qw(Bot::BasicBot::Pluggable::Module);
 use warnings;
@@ -106,7 +106,7 @@ Bot::BasicBot::Pluggable::Module::Join - join and leave channels; remembers stat
 
 =head1 VERSION
 
-version 0.97
+version 0.98
 
 =head1 IRC USAGE
 
