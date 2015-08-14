@@ -25,6 +25,19 @@ sub init {
         }
     );
 }
+sub slugify {
+  my $str = shift;
+
+  $str = NFKD($str);        # Normalize the Unicode string
+  $str = unidecode($str);   # Un-accent characters
+  $str =~ tr/\000-\177//cd; # Strip non-ASCII characters (>127)
+  $str =~ s/[^\w\s-]//g;    # Remove all non-word characters
+  $str = lc($str);          # Lowercase
+  $str =~ s/[-\s]+/-/g;     # Replace spaces and hyphens with a single hyphen
+  $str =~ s/^-|-$//g;       # Trim hyphens from both ends
+
+  return $str;
+}
 
 sub admin {
 
@@ -48,7 +61,9 @@ sub admin {
         my $title = title("$_");
         next unless defined $title;
         $title = unidecode($title) if $self->get("user_asciify");
-        $reply .= "[ $title ] ";
+	my $short_title = substr($title,0,10);
+	my $slug = slugify($short_title);
+        $reply .= "[ $title ] " unless ($uri=~ /$slug/)
     }
 
     if ($reply) { $self->reply( $mess, $reply ) }
