@@ -61,9 +61,9 @@ sub admin {
         my $title = title("$_");
         next unless defined $title;
         $title = unidecode($title) if $self->get("user_asciify");
-	my $short_title = substr($title,0,10);
-	my $slug = slugify($short_title);
-        $reply .= "[ $title ] " unless ($uri=~ /$slug/)
+	if ($uri !~ /slugify(substr($title,0,8))/){
+		$reply .= "[ $title ] "
+	}
     }
 
     if ($reply) { $self->reply( $mess, $reply ) }
